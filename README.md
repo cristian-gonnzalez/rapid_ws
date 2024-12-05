@@ -7,15 +7,15 @@
 
 ## Running the app
   
-   - 1 - Clone the repository
-   - 2 - Run the sql script tools\create_db.sql to create the db with data.
-   - 3 - Run the app
-      - Windows:
-          ./mvnw.cmd spring-boot:run to start the app
-      - Linux:
-         ./mvnw spring-boot:run to start the app
-      
-   Open the browser and go to [http://local](http://localhost:8080/concert) to check that the app is running.
+       1 - Clone the repository
+       2 - Run the sql script tools\create_db.sql to create the db with data.
+       3 - Run the app
+          - Windows:
+              ./mvnw.cmd spring-boot:run
+          - Linux:
+             ./mvnw spring-boot:run
+          
+   Open the browser and go to [http://localhost:8080/concert](http://localhost:8080/concert) to check that the app is running.
 
 ## Running the tests
    You will find tests in tests\integration directory.
@@ -47,11 +47,12 @@
 
 ## REST protocol:
 
-- POST /concert
+- GET /concert
+  
     Gets the list of concerts.
     You can send combinatios of input fields o none depends on the search.
         
-        POST /concert
+        GET /concert
         Host: localhost:8080
         Content-type: application/json
         { 
@@ -60,7 +61,26 @@
           'concertDate': '2025-01-01' 
         }
 
-    Example of response:
+ 
+- GET /concert/range
+  
+    Gets the list of concerts by range.
+    You can send combinatios of input fields o none depends on the search.
+        
+        GET /concert/range
+        Host: localhost:8080
+        Content-type: application/json
+        {
+          'artist':'ARTIST_1',
+          'place': 'PLACE_1', 
+           'fromDate': '2020-01-01', 'untilDate':'2026-01-01', 
+           'fromPrice': 10, 'untilPrice': 10000, 
+           'dateASC': False, 
+           'priceASC': False 
+        }
+
+
+   Example of response:
   
       {
           "data": [
@@ -105,3 +125,17 @@
                 "code":"success"
             }
         }
+
+ ### Request parameters:
+ You can send these parameters in the GET requests
+ 
+     rec_num: Record number where to start the response
+     offset: Number of records to return
+
+ Example:
+
+    GET /concert?rec_num=0&offset=1
+ 
+
+
+
