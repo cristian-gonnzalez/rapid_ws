@@ -79,53 +79,6 @@
            'priceASC': False 
         }
 
-
-   Example of response:
-  
-      {
-          "data": [
-            {
-              "artist": "ARTIST_1",
-              "place": "PLACE_1",
-              "concertDate": "2025-01-01",
-              "concertTime": "09:00:00",
-              "concertSector": [
-                {
-                  "name": "A1P1S2",
-                  "price": 500000,
-                  "roomSpace": 5,
-                  "occupiedSpace": 4,
-                  "hasSeat": true,
-                  "seats": [
-                    3,
-                    4
-                  ],
-                },
-                {
-                  "name": "A1P1S3",
-                  "price": 200000,
-                  "roomSpace": 5,
-                  "occupiedSpace": 0,
-                  "hasSeat": false,
-                  "seats": []
-                }
-              ],
-          "appStatus": {
-            "message": "Success",
-            "code": "success"
-          }
-        }
-
-    As you can see, all commands output has this format:
-
-        {
-            "data":[],"
-            "response_code":{
-                "msg":"Success",
-                "code":"success"
-            }
-        }
-
  ### Request parameters:
  You can send these parameters in the GET requests
  
@@ -137,5 +90,90 @@
     GET /concert?rec_num=0&offset=1
  
 
+- POST /concert/reserve
+  
+    To reserve a concert in a sector with seats, you must send:
+  
+       POST /concert/reserve
+            Host: localhost:8080
+            Content-type: application/json
+        {
+            "artist": "ARTIST_1",
+            "place": "PLACE_1",
+            "concertDate": "2025-01-01",
+            "sector": "A1P1S2", 
+            "seats": [3,4], 
+            "surname": "Gonzalez",
+            "name": "Cristian",
+            "dni": "12123123"
+        }
 
+    All fields are mandatories.
+  
+    If you want to reserve a place in a sector with no seat, change the field 'seats': [] by 'qty': integer 
+
+
+- DELETE /concert/reserve
+  
+    To delete a reserve:
+  
+       DELETE /concert/reserve
+            Host: localhost:8080
+            Content-type: application/json
+        {
+            'reserveId': 1,
+            "artist": "ARTIST_1",
+            "place": "PLACE_1",
+            "concertDate": "2025-01-01",
+            "sector": "A1P1S2", 
+            "seats": [3,4]
+        }
+
+   ### Response
+
+  - GET response:
+  
+          {
+              "data": [
+                {
+                  "artist": "ARTIST_1",
+                  "place": "PLACE_1",
+                  "concertDate": "2025-01-01",
+                  "concertTime": "09:00:00",
+                  "concertSector": [
+                    {
+                      "name": "A1P1S2",
+                      "price": 500000,
+                      "roomSpace": 5,
+                      "occupiedSpace": 4,
+                      "hasSeat": true,
+                      "seats": [
+                        3,
+                        4
+                      ],
+                    },
+                    {
+                      "name": "A1P1S3",
+                      "price": 200000,
+                      "roomSpace": 5,
+                      "occupiedSpace": 0,
+                      "hasSeat": false,
+                      "seats": []
+                    }
+                  ],
+              "appStatus": {
+                "message": "Success",
+                "code": "success"
+              }
+            }
+
+    As you can see, all commands output has this format:
+
+        {
+            "data":[],"
+            "response_code":{
+                "msg":"Success",
+                "code":"success"
+            }
+        }
 
