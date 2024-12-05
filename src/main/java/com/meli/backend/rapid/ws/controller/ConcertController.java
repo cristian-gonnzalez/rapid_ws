@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.meli.backend.rapid.req_ctx.req_ctx_io.*;
 import com.meli.backend.rapid.ws.services.ConcertService;
-import com.meli.backend.rapid.req_ctx.ConcertReqCtx;
-import com.meli.backend.rapid.req_ctx.ConcertRgReqCtx;
+import com.meli.backend.rapid.req_ctx.ConcertRequestContext;
+import com.meli.backend.rapid.req_ctx.ConcertRgRequestContext;
 
 @RestController
 @RequestMapping("/concert")
@@ -32,7 +32,7 @@ public class ConcertController {
 
     @GetMapping
     public RequestOutput getAllConcerts(@RequestParam(name = "rec_num", defaultValue = "0") int rec_num, @RequestParam(name = "offset", defaultValue = "30") int offset, @RequestBody (required=false) ConcertInput input) {
-        ConcertReqCtx ctx = new ConcertReqCtx( input );
+        ConcertRequestContext ctx = new ConcertRequestContext( input );
         ctx.recOutParam.setRecNum(rec_num);
         ctx.recOutParam.setOffset(offset);
 
@@ -51,7 +51,7 @@ public class ConcertController {
 
     @GetMapping("/range")
     public RequestOutput getConcertsByRange(@RequestParam(name = "rec_num", defaultValue = "0") int rec_num, @RequestParam(name = "offset", defaultValue = "30") int offset, @RequestBody (required=false) ConcertRangeInput input) {
-        ConcertRgReqCtx ctx = new ConcertRgReqCtx( input );
+        ConcertRgRequestContext ctx = new ConcertRgRequestContext( input );
         ctx.recOutParam.setRecNum(rec_num);
         ctx.recOutParam.setOffset(offset);
 

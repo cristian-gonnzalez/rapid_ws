@@ -1,31 +1,31 @@
 /** 
- * This files containts the context for process the request url /concert
+ * This files containts the context for process the request url /concert/range
  */
 package com.meli.backend.rapid.req_ctx;
 
 import com.meli.backend.rapid.common.RecordOutParam;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.*;
+import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertRangeInput;
 
-/** Concert request context.
+/** Concert range request context.
  *  
  */
-public class ConcertReqCtx  extends RequestContext {
+public class ConcertRgRequestContext extends RequestContext {
     
     /** Request paramaters that specifies the number of records to give in the ouput */
     public RecordOutParam recOutParam;
 
     /** Input request fields */
-    public ConcertInput input;
-
+    public ConcertRangeInput input;
+    
     /** Initializes the context
      * 
      * @param input Input request fields
      */
-    public ConcertReqCtx( ConcertInput input ) {
+    public ConcertRgRequestContext( ConcertRangeInput input ) {
         super();
         this.input = input;
         if( this.input == null ) {
-            this.input = new ConcertInput();
+            this.input = new ConcertRangeInput();
         }
         recOutParam = new RecordOutParam();
     }

@@ -15,4 +15,9 @@ public class RequestContext {
     public Boolean isOnError() {
         return ( output.getAppStatus().getCode() != eRCode.success);
     }
+
+    public void setError( eRCode code, String msg) {
+        output.getAppStatus().setCode(code);
+        output.getAppStatus().setMessage(msg);
+    }
 }

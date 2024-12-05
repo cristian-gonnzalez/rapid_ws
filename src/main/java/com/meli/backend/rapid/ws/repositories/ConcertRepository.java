@@ -188,7 +188,7 @@ public class ConcertRepository {
      * @param ctx Context.
      * @return The list of concerts.
      */
-    public List<ConcertOutput> getConcertsByRange(ConcertRgReqCtx ctx) {
+    public List<ConcertOutput> getConcertsByRange(ConcertRgRequestContext ctx) {
          
         /* Builds the where sql clause to add in the query */
         String wheresql = "";
@@ -226,7 +226,7 @@ public class ConcertRepository {
      * @param ctx Context
      * @return List of concerts
      */
-    public List<ConcertOutput> getConcerts( ConcertReqCtx ctx) {
+    public List<ConcertOutput> getConcerts( ConcertRequestContext ctx) {
 
             String wheresql = "";
             if( ctx.input.getArtist() != null ) {

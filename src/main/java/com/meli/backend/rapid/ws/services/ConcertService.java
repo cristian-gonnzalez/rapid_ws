@@ -22,7 +22,7 @@ public class ConcertService {
      * @param ctx Context.
      * @return the list of concerts.
      */
-    public List<ConcertOutput> getConcertsByRange(ConcertRgReqCtx ctx) {
+    public List<ConcertOutput> getConcertsByRange(ConcertRgRequestContext ctx) {
         List<ConcertOutput> concerts;
         //synchronized(CMutext.getInstance()) {
             concerts = concertRepository.getConcertsByRange(ctx);
@@ -35,7 +35,7 @@ public class ConcertService {
      * @param ctx Context
      * @return The list of concerts.
      */
-    public List<ConcertOutput> getAllConcerts(ConcertReqCtx ctx) {
+    public List<ConcertOutput> getAllConcerts(ConcertRequestContext ctx) {
         List<ConcertOutput> concerts;
         //synchronized(CMutext.getInstance()) {
             concerts = concertRepository.getConcerts(ctx);

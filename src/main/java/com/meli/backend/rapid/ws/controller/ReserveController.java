@@ -21,44 +21,21 @@ public class ReserveController {
         this.reserveService = new ReserveService();
     }
 
-    private boolean validateInput( ReserveReqCtx ctx,  ReserveInput input ) {
+    private boolean validateInput( ReserveRequestContext ctx,  ReserveInput input ) {
         // validates the mandatory fields before delegating to the service
-        if( input.getArtist() == null) {
-            ctx.output.getAppStatus().setCode(eRCode.missingField);
-            ctx.output.getAppStatus().setMessage("Missing filed 'artist'");
-            
+        if( input.getArtist() == null || input.getPlace() == null || 
+            input.getConcertDate() == null ||  input.getSector() == null) {
+            ctx.setError(eRCode.missingField, "Missing filed");
             return false;
         }
-        if( input.getPlace() == null) {
-            ctx.output.getAppStatus().setCode(eRCode.missingField);
-            ctx.output.getAppStatus().setMessage("Missing filed 'place'");
-            
-            return false;
-        }
-        if( input.getConcertDate() == null) {
-            ctx.output.getAppStatus().setCode(eRCode.missingField);
-            ctx.output.getAppStatus().setMessage("Missing filed 'concertDate'");
-            
-            return false;
-        }
-        if( input.getSector() == null) {
-            ctx.output.getAppStatus().setCode(eRCode.missingField);
-            ctx.output.getAppStatus().setMessage("Missing filed 'sector'");
-            
-            return false;
-        }
+
         if( (input.getQuantity() == null && input.getSeats() == null) || 
             (input.getQuantity() != null && input.getSeats() != null)) {
-            ctx.output.getAppStatus().setCode(eRCode.lessOrTooMuchFields);
-            ctx.output.getAppStatus().setMessage("One field is required: 'qty' or 'seats'");
-            
+            ctx.setError(eRCode.lessOrTooMuchFields, "One field is required: 'qty' or 'seats'");
             return false;
         }
-        if( input.getName() == null || input.getDNI() == null || 
-            input.getSurname() == null ) {
-            ctx.output.getAppStatus().setCode(eRCode.lessOrTooMuchFields);
-            ctx.output.getAppStatus().setMessage("User name, surname and dni is required to reserve");
-            
+        if( input.getName() == null || input.getDNI() == null || input.getSurname() == null ) {
+            ctx.setError(eRCode.lessOrTooMuchFields, "User name, surname and dni is required to reserve");
             return false;
         }
 
@@ -76,7 +53,7 @@ public class ReserveController {
     @PostMapping("/reserve")
     public RequestOutput reserveConcert(@RequestBody (required = true) ReserveInput input) {
         
-        ReserveReqCtx ctx = new ReserveReqCtx(input );
+        ReserveRequestContext ctx = new ReserveRequestContext(input );
         if( validateInput( ctx, ctx.input) ) {
             this.reserveService.reserveConcert(ctx);            
         }
@@ -96,12 +73,11 @@ public class ReserveController {
     @DeleteMapping("/reserve")
     public RequestOutput deleteReserveConcert(@RequestBody (required = true) DelReserveInput input) {
         
-        DelReserveReqCtx ctx = new DelReserveReqCtx(input );
+        DelReserveRequestContext ctx = new DelReserveRequestContext(input );
         
         if( ctx.input.getReserveId() == null || ctx.input.getArtist() == null || 
             ctx.input.getPlace() == null || ctx.input.getConcertDate() == null || ctx.input.getSector() == null ) {
-            ctx.output.getAppStatus().setCode(eRCode.lessOrTooMuchFields);
-            ctx.output.getAppStatus().setMessage("All fields are mandatory");
+            ctx.setError(eRCode.lessOrTooMuchFields, "All fields are mandatory");
         }
 
         this.reserveService.deleteReserve( ctx );
