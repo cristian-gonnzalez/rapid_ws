@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.meli.backend.rapid.common.CMutext;
 import com.meli.backend.rapid.common.AppStatus.eRCode;
+import com.meli.backend.rapid.req_ctx.DelReserveReqCtx;
 import com.meli.backend.rapid.req_ctx.ReserveReqCtx;
 import com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput;
 import com.meli.backend.rapid.ws.models.ConcertSector;
@@ -171,6 +172,54 @@ public class ReserveService {
             }
 
             
+        }
+    }
+
+    
+    public void deleteReserve( DelReserveReqCtx ctx ) {
+
+        int artistId = concertRepository.getArtistID(ctx.input.getArtist());
+        int placeId = concertRepository.getPlaceID(ctx.input.getPlace());
+        int sectorId = concertRepository.getSectorID(artistId, placeId, ctx.input.getConcertDate(), ctx.input.getSector());
+
+        List<ConcertSector> sectors = concertSectorRepository.getConcertSectors(null, artistId, placeId, ctx.input.getConcertDate(), ctx.input.getSector() );
+        if( sectors.size() == 0 ) {
+            ctx.output.getAppStatus().setCode(eRCode.valueNotFound);
+            ctx.output.getAppStatus().setMessage("Sector not found");
+        }
+
+        ConcertSector cs = sectors.get(0);
+        if( !cs.getHasSeat() && ctx.input.getSeats().size() > 0 ) {
+            ctx.output.getAppStatus().setCode(eRCode.invalidFields);
+            ctx.output.getAppStatus().setMessage("The sector has not seats section");            
+        }
+
+        for( int i=0; i< ctx.input.getSeats().size(); i++ ) {
+            boolean found = false;
+            for( int j=0; j< cs.getSeats().size(); j++ ) {
+                if( ctx.input.getSeats().get(i) == cs.getSeats().get(j)) {
+                    found = true;
+                    break;
+                }
+            }    
+
+            if( !found ){
+                ctx.output.getAppStatus().setCode(eRCode.invalidFields);
+                ctx.output.getAppStatus().setMessage("The seats was not found");
+                break;            
+            }
+        }
+        
+        if( ctx.isOnError()) {
+            return;
+        }
+
+        synchronized(CMutext.getInstance()) {
+            try {
+                reserveRepository.deleteReserve(ctx.input.getReserveId(), artistId, placeId, ctx.input.getConcertDate(), sectorId, cs.getSeats(), cs );           
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
         }
     }
 }

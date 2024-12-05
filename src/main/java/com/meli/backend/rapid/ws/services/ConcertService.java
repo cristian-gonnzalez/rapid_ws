@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.meli.backend.rapid.common.*;
 import com.meli.backend.rapid.req_ctx.*;
 import com.meli.backend.rapid.req_ctx.req_ctx_io.*;
 import com.meli.backend.rapid.ws.repositories.*;
@@ -25,9 +24,9 @@ public class ConcertService {
      */
     public List<ConcertOutput> getConcertsByRange(ConcertRgReqCtx ctx) {
         List<ConcertOutput> concerts;
-        synchronized(CMutext.getInstance()) {
+        //synchronized(CMutext.getInstance()) {
             concerts = concertRepository.getConcertsByRange(ctx);
-        }
+        //}
         return concerts;
     }
 
@@ -38,9 +37,10 @@ public class ConcertService {
      */
     public List<ConcertOutput> getAllConcerts(ConcertReqCtx ctx) {
         List<ConcertOutput> concerts;
-        synchronized(CMutext.getInstance()) {
+        //synchronized(CMutext.getInstance()) {
             concerts = concertRepository.getConcerts(ctx);
-        }
+        //}
         return concerts;
     }
+
 }

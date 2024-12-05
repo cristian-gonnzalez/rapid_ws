@@ -226,7 +226,7 @@ public class ConcertRepository {
      * @param ctx Context
      * @return List of concerts
      */
-    public List<ConcertOutput> getConcerts(ConcertReqCtx ctx) {
+    public List<ConcertOutput> getConcerts( ConcertReqCtx ctx) {
 
             String wheresql = "";
             if( ctx.input.getArtist() != null ) {

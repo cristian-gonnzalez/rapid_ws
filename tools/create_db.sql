@@ -110,27 +110,6 @@ INSERT INTO `ConcertSector` (`artistId`, `placeId`, `concertDate`, `sectorId`, `
 (1, 5, '2025-01-06', 2, "A2P2S2", 5, 0, 1, 201000.00),
 (2, 1, '2025-05-01', 2, "A2P2S2", 5, 0, 1, 201000.00);
 
--- Create the table Seat.
--- The table saves the reserved seats that belongs to one concert sector in a concert date
-CREATE TABLE IF NOT EXISTS `Seat` (
-  `artistId` int NOT NULL,
-  `placeId` int NOT NULL,
-  `concertDate` date NOT NULL,
-  `sectorId` int NOT NULL,
-  `seatNumber` int NOT NULL,
-  PRIMARY KEY (`artistId`, `placeId`, `concertDate`, `sectorId`, `seatNumber`)
-) ;
-
--- Point the fk to the concert sector
-ALTER TABLE `Seat`
-  ADD CONSTRAINT `fk_Seat_1` FOREIGN KEY (`artistId`, `placeId`, `concertDate`, `sectorId`) REFERENCES `ConcertSector` (`artistId`, `placeId`, `concertDate`, `sectorId`);
-
--- Insert tests values
-INSERT INTO `Seat` (`artistId`, `placeId`, `concertDate`, `sectorId`, `seatNumber`) VALUES 
-(1, 1, '2025-01-01', 2, 1),
-(1, 1, '2025-01-01', 2, 2),
-(2, 2, '2025-01-01', 2, 1);
-
 -- Create table reserve that saves the reservation or booking of the concert
 CREATE TABLE IF NOT EXISTS `Reserve` (
   `datetime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -150,3 +129,28 @@ CREATE TABLE IF NOT EXISTS `Reserve` (
 -- Points the fk to the concert sector 
 ALTER TABLE `Reserve`
   ADD CONSTRAINT `fk_Reserve_1` FOREIGN KEY (`artistId`, `placeId`, `concertDate`, `sectorId`) REFERENCES `ConcertSector` (`artistId`, `placeId`, `concertDate`, `sectorId`);
+
+-- Create the table Seat.
+-- The table saves the reserved seats that belongs to one concert sector in a concert date
+CREATE TABLE IF NOT EXISTS `Seat` (
+  `reserveId` int NOT NULL,
+  `artistId` int NOT NULL,
+  `placeId` int NOT NULL,
+  `concertDate` date NOT NULL,
+  `sectorId` int NOT NULL,
+  `seatNumber` int NOT NULL,
+  PRIMARY KEY (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`, `seatNumber`)
+) ;
+
+-- Point the fk to the concert sector
+ALTER TABLE `Seat`
+  ADD CONSTRAINT `fk_Seat_1` FOREIGN KEY (`artistId`, `placeId`, `concertDate`, `sectorId`) REFERENCES `ConcertSector` (`artistId`, `placeId`, `concertDate`, `sectorId`),
+  ADD CONSTRAINT `fk_Seat_2` FOREIGN KEY (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`) REFERENCES `Reserve` (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`);
+
+
+-- Insert tests values
+-- INSERT INTO `Seat` (`artistId`, `placeId`, `concertDate`, `sectorId`, `seatNumber`) VALUES 
+-- (1, 1, '2025-01-01', 2, 1),
+-- (1, 1, '2025-01-01', 2, 2),
+-- (2, 2, '2025-01-01', 2, 1);
+

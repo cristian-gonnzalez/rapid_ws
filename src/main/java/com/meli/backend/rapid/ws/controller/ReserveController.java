@@ -92,4 +92,21 @@ public class ReserveController {
         return ctx.output;
     }
 
+
+    @DeleteMapping("/reserve")
+    public RequestOutput deleteReserveConcert(@RequestBody (required = true) DelReserveInput input) {
+        
+        DelReserveReqCtx ctx = new DelReserveReqCtx(input );
+        
+        if( ctx.input.getReserveId() == null || ctx.input.getArtist() == null || 
+            ctx.input.getPlace() == null || ctx.input.getConcertDate() == null || ctx.input.getSector() == null ) {
+            ctx.output.getAppStatus().setCode(eRCode.lessOrTooMuchFields);
+            ctx.output.getAppStatus().setMessage("All fields are mandatory");
+        }
+
+        this.reserveService.deleteReserve( ctx );
+        
+        return ctx.output;
+    }
+
 }

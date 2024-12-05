@@ -89,7 +89,26 @@ def paramGetRequestResponseOneTwoThreeRecTest():
     assert len( response['data'] ) == 2, len( response['data'] )
 
 
-def rangeGetRequestResponseOneRecTest():
+def combineInputFieldsGetReturnsSuccess():
+
+    input_fields = [
+        { 'artist': 'ARTIST_1' },
+        { 'place': 'PLACE_1' },
+        { 'concertDate': '2025-01-01' },
+        { 'artist': 'ARTIST_1', 'place': 'PLACE_1' },
+        { 'artist': 'ARTIST_1', 'concertDate': '2025-01-01' },
+        { 'place': 'PLACE_1', 'concertDate': '2025-01-01' },
+        { 'artist': 'ARTIST_1', 'place': 'PLACE_1', 'concertDate': '2025-01-01' },
+    ]
+
+    for input_field in input_fields:
+        url = api_url + "/concert"
+        response = requests.get(url, data=json.dumps(input_field), headers=headers)
+        response = assert_reponse( response )
+      
+
+
+def paramGetRequestResponseOneRecTest():
 
     url = api_url + "/concert?rec_num=0&offset=1"
     data = {
@@ -111,6 +130,32 @@ def rangeGetRequestResponseOneRecTest():
   
     assert len( response['data'] ) == 2, len( response['data'] )
 
+
+def assertResponseFields( response ):
+
+    assert 'data' in response.keys()
+
+    data_fields = ['artist', 'place', 'concertDate', 'concertTime', 'concertSector']
+    concertSector_fields = ['name', 'price', 'roomSpace', 'occupiedSpace', 'hasSeat', 'seats']
+
+    record = response['data'][0]
+    for k in data_fields:
+        assert k in list( record.keys() ), "Missing field %s in 'data'" % k
+
+    if len( record['concertSector'] ) > 0:
+        sector = record['concertSector'][0]
+        for k in concertSector_fields:
+            assert k in list( sector.keys() ), "Missing field %s in 'data'->'concertSector'" % k
+    
+
+def checksResponseFields():
+    url = api_url + "/concert"
+    input_fields = {
+    }
+    response = requests.get(url, data=json.dumps(input_fields), headers=headers)
+    response = assert_reponse( response )
+    assertResponseFields( response )
+
 if __name__ == '__main__': 
 
     tests = [
@@ -118,7 +163,10 @@ if __name__ == '__main__':
         test_runner(artistGetRequestResonseOneRecordTest),
         test_runner(unknownArtistGetRequestResponseEmptyTest),
         test_runner(multiplesGetRequestTest),
-        test_runner(paramGetRequestResponseOneTwoThreeRecTest)
+        test_runner(combineInputFieldsGetReturnsSuccess),
+        test_runner(paramGetRequestResponseOneRecTest),
+        test_runner(paramGetRequestResponseOneTwoThreeRecTest),
+        test_runner(checksResponseFields)
     ]
 
     print("Running " + os.path.basename(__file__) + "\n" )
