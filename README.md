@@ -1,12 +1,11 @@
 # RapidWS
-Rapid Web Server
 
-- Requirements:
+## Requirements:
     - MySQL
     - Java 17
     - Python 3
 
-- Running the app
+## Running the app
   
    - 1 - Clone the repository
    - 2 - Run the sql script tools\create_db.sql to create the db with data.
@@ -18,7 +17,7 @@ Rapid Web Server
       
    Open the browser and go to [http://local](http://localhost:8080/concert) to check that the app is running.
 
-- Running the tests
+## Running the tests
    You will find tests in tests\integration directory.
    
    Example:
@@ -46,47 +45,63 @@ Rapid Web Server
         concertTests.py end
 
 
-- REST protocol:
+## REST protocol:
 
-POST /concert
-    Gets the list of concerts
-    If no input is specified, returns all the concerts with its caracteristics
+- POST /concert
+    Gets the list of concerts.
+    You can send combinatios of input fields o none depends on the search.
+        
+        POST /concert
+        Host: localhost:8080
+        Content-type: application/json
+        { 
+          'artist': 'ARTIST_1', 
+          'place': 'PLACE_1', 
+          'concertDate': '2025-01-01' 
+        }
 
-POST /concert
-Host: localhost:8080
-Content-type: application/json
+    Example of response:
+  
+      {
+          "data": [
+            {
+              "artist": "ARTIST_1",
+              "place": "PLACE_1",
+              "concertDate": "2025-01-01",
+              "concertTime": "09:00:00",
+              "concertSector": [
+                {
+                  "name": "A1P1S2",
+                  "price": 500000,
+                  "roomSpace": 5,
+                  "occupiedSpace": 4,
+                  "hasSeat": true,
+                  "seats": [
+                    3,
+                    4
+                  ],
+                },
+                {
+                  "name": "A1P1S3",
+                  "price": 200000,
+                  "roomSpace": 5,
+                  "occupiedSpace": 0,
+                  "hasSeat": false,
+                  "seats": []
+                }
+              ],
+          "appStatus": {
+            "message": "Success",
+            "code": "success"
+          }
+        }
 
-{}
+    As you can see, all commands output has this format:
 
-
-    The command accepts the following fields individually or combination of these
-
-    - artist: Specified the artist name
-    - place: Specified the Place
-    - concertDate: Specified the concertDate
-
-
-POST /concert
-Host: localhost:8080
-Content-type: application/json
-
-{
-    'artist': 'Metallica'
-    'place': 'La Plata Stadium'
-    'concertData': '2025-01-01'
-}
-
-
-Command response:
-
-    All command output has the following representation:
-
-HTTP/1.1 200 OK
-Content-Type: application/json
-{
-    "data":[],"
-    "response_code":{
-        "msg":"Success",
-        "code":"success"
-    }
-}
+        {
+            "data":[],"
+            "response_code":{
+                "msg":"Success",
+                "code":"success"
+            }
+        }
