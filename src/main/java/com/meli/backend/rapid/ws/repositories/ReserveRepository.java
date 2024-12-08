@@ -7,6 +7,7 @@ import com.meli.backend.rapid.db.DataBase;
 import com.meli.backend.rapid.db.ReserveSql;
 import com.meli.backend.rapid.db.ReserveStmt;
 import com.meli.backend.rapid.req_ctx.DelReserveRequestContext;
+import com.meli.backend.rapid.req_ctx.GetReserveRequestContext;
 import com.meli.backend.rapid.req_ctx.ReserveRequestContext;
 import com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput;
 import com.meli.backend.rapid.req_ctx.req_ctx_io.SectorOutput;
@@ -131,28 +132,27 @@ public class ReserveRepository {
             
     }
 
-    /** Saves the reserve and udpate tables
+    /** Save the reserve and udpate related tables
      * 
-     * @param reserve Reserve info.
-     * @param artistId The artist id.
-     * @param placeId The place id.
-     * @param concertDate The concert date.
-     * @param sectorId The sector id.
-     * @param seats The list of seats to reserve.
-     * @param cs The sector of concert.
+     * @param ctx Context.
+     * @param reserve Reserve output.
+     * @param sector_rec Sector record.
+     * 
      * @return true if success, false otherwise.
      */
     public Boolean saveReserve(ReserveRequestContext ctx, ReserveOutput reserve, SectorRecord sector_rec ) throws SQLException {
 
         Boolean r = false;
         
+        // create an db instance and connect to it
         DataBase db = new DataBase();
         db.connect();
         
         try {
-            
+            // since we are going to update more than one table, we need to begin a transaction
             db.begin();
 
+            // insert the reserve
             r = insertReserve(db, reserve, sector_rec);
             if( !r ) {
                 System.err.println("Failed to save reserve in table");
@@ -161,9 +161,11 @@ public class ReserveRepository {
                 return r;
             }
         
+            // fill the output with the reserved id and the datetime 
             reserve.setReserveId( getLastID(db) );
             reserve.setDatetime( getLastDatetime(db) );
 
+            // update the sector
             SectorOutput cs = reserve.getConcertInfo().getSector();
             r = updateConcertSector( db, sector_rec );
             if( !r ) {
@@ -173,6 +175,7 @@ public class ReserveRepository {
                 return r;
             }
             
+            // if the sector has seats, insert the records in the seat table 
             if( cs.getHasSeat() ) {
                 r = insertReservedSeats(db, reserve, sector_rec );
                 if( !r ) {
@@ -183,6 +186,7 @@ public class ReserveRepository {
                 }
             }
             
+            // commit the transaction
             db.commit();
         } catch (SQLException e) {
             db.rollback();
@@ -192,8 +196,41 @@ public class ReserveRepository {
         return r;
     }
 
+
+    public List<ReserveRecord> getReserves(GetReserveRequestContext ctx) throws SQLException{
+
+        // creates an statement
+        ReserveStmt stmt = new ReserveStmt();
+        if( ctx.input.getReserveId() != 0)
+            stmt.setReserveId(ctx.input.getReserveId());
+        if( ctx.input.getArtist() != null)
+            stmt.setArtist(ctx.input.getArtist());
+        if( ctx.input.getPlace() != null)
+            stmt.setPlace(ctx.input.getPlace());
+        if( ctx.input.getConcertDate() != null)
+            stmt.setDate(ctx.input.getConcertDate());
+        if( ctx.input.getSector() != null)
+            stmt.setSector(ctx.input.getSector());
+        if( ctx.input.getName() != null)
+            stmt.setUsername(ctx.input.getName());
+        if( ctx.input.getSurname() != null)
+            stmt.setUsersurname(ctx.input.getSurname());
+        if( ctx.input.getDNI() != 0)
+            stmt.setDNI(ctx.input.getDNI());
+       
+        DataBase db = new DataBase();
+        db.connect();
+        ReserveSql sql = new ReserveSql(db, stmt);
+        List<ReserveRecord> reserveRecords = sql.read();
+        db.disconnect();
+
+        return reserveRecords;
+    } 
+
+
     public ReserveRecord getReserve(DelReserveRequestContext ctx) throws SQLException{
 
+        // creates an statement
         ReserveStmt stmt = new ReserveStmt();
         stmt.setReserveId(ctx.input.getReserveId());
         stmt.setArtist(ctx.input.getArtist());

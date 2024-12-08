@@ -2,6 +2,8 @@ package com.meli.backend.rapid.req_ctx.req_ctx_io;
 
 import java.sql.Date;
 
+import com.meli.backend.rapid.ws.models.User;
+
 
 public class ReserveOutput {
 
@@ -13,19 +15,19 @@ public class ReserveOutput {
     
     private Total total;
 
-    private UserInfo user;
+    private User user;
 
     public ReserveOutput() {
         this.concert = new ConcertInfo();
         this.total = new Total();
-        this.user = new UserInfo();
+        this.user = new User();
     }
 
-    public void setUserInfo( UserInfo user ) {
+    public void setUserInfo( User user ) {
         this.user = user;
     }
 
-    public UserInfo getUserInfo() {
+    public User getUserInfo() {
         return this.user;
     }
 
@@ -140,36 +142,4 @@ public class ReserveOutput {
         }
     } 
 
-    public class UserInfo {
-
-        private String name;
-
-        private String surname;
-    
-        private double dni;
-
-        public UserInfo() {
-        }
-
-        public void setDNI( double dni ) {
-            this.dni = dni;
-        }
-        public double getDNI() {
-            return this.dni;
-        }
-
-        public void setSurname( String surname ) {
-            this.surname = surname;
-        }
-        public String getSurname() {
-            return this.surname;
-        }
-
-        public void setName( String name ) {
-            this.name = name;
-        }
-        public String getName() {
-            return this.name;
-        }
-    }
 }

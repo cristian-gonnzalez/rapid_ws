@@ -17,7 +17,8 @@ public class AppStatus {
         valueNotFound,
         noRoomAvailable,
         seatReserved,
-        failToApllyEffect
+        failToApllyEffect,
+        unknownError
     };
     
     @JsonIgnore
@@ -44,6 +45,7 @@ public class AppStatus {
         codoToHttpStatus.put(eRCode.noRoomAvailable, HttpStatus.BAD_REQUEST);
         codoToHttpStatus.put(eRCode.seatReserved, HttpStatus.BAD_REQUEST);
         codoToHttpStatus.put(eRCode.failToApllyEffect, HttpStatus.BAD_REQUEST);
+        codoToHttpStatus.put(eRCode.unknownError, HttpStatus.BAD_REQUEST);
     }
 
     @JsonIgnore

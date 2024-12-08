@@ -46,5 +46,20 @@ public class ReserveStmt extends SqlStmt  {
         wheresql.add(wsql);
     }
 
+
+    public void setUsername( String name ) {
+        String wsql = " r.name = '" +  name + "'' ";
+        wheresql.add(wsql);
+    }
+
+    public void setUsersurname( String surname ) {
+        String wsql = " r.surname = '" +  surname + "'' ";
+        wheresql.add(wsql);
+    }
+
+    public void setDNI( Long dni ) {
+        String wsql = " r.dni = " +  dni + " ";
+        wheresql.add(wsql);
+    }
 }
 

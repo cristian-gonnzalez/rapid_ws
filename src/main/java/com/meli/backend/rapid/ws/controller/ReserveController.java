@@ -4,8 +4,8 @@
 package com.meli.backend.rapid.ws.controller;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,32 +47,42 @@ public class ReserveController {
 
     
     @PostMapping("/reserve")
-    public ResponseEntity<RequestOutput> getReserves(@RequestBody (required = true) ReserveInput input) {
-        
+    public ResponseEntity<RequestOutput> getReserves(@RequestBody (required = true) ReserveInput input) { 
         ReserveRequestContext ctx = new ReserveRequestContext(input );
+        
+        
         if( validateInput( ctx, ctx.input) ) {
             this.reserveService.reserveConcert(ctx);            
         }
-        
-        ResponseEntity<RequestOutput> re =  null;
-        try {
             
-            if(ctx.isOnError())
-                ctx.output.setData(new ArrayList<>());
+        if(ctx.isOnError())
+            ctx.output.setData(new ArrayList<>());
 
-            re = new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
-        } catch (Exception e) {
-        }
-        return re;
+        return new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
     }
 
     
     @GetMapping("/reserve")
-    public ResponseEntity<String> reserveConcert(@RequestBody (required = true) ReserveInput input) {
-        
-        ResponseEntity<String> re =  null;
-        re = new ResponseEntity<String>("Not implemented", HttpStatus.SERVICE_UNAVAILABLE);
-        return re;
+    public ResponseEntity<RequestOutput> getReserves(@RequestParam(name = "rec_num", defaultValue = "0") int rec_num, 
+                                                     @RequestParam(name = "offset", defaultValue = "30") int offset, 
+                                                     @RequestBody (required=false) GetReserveInput input) {
+        GetReserveRequestContext ctx = new GetReserveRequestContext( input );
+        ctx.reqParam.setRecNum(rec_num);
+        ctx.reqParam.setOffset(offset);
+
+        try {
+            List<ReserveOutput> reserves = reserveService.getReserves(ctx);
+            ctx.output.setData(reserves);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            if( !ctx.isOnError() ) {
+                ctx.setError(eRCode.unknownError, "Unknow error");
+                ctx.output.setData(new ArrayList<>());
+            }   
+        }
+
+        return new ResponseEntity<RequestOutput>(ctx.output, 
+                                                 ctx.output.getAppStatus().toHttpStatus());
     }
 
 
@@ -87,16 +97,21 @@ public class ReserveController {
         }
         ctx.output.setData(new ArrayList<>());
 
-        ResponseEntity<RequestOutput> re =  null;
         try {
+       
             this.reserveService.deleteReserve( ctx );
 
             if(ctx.isOnError())
                 ctx.output.setData(new ArrayList<>());
 
-            re = new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
         } catch (Exception e) {
+            System.err.println(e.getMessage());
+            if( !ctx.isOnError() ) {
+                ctx.setError(eRCode.unknownError, "Unknow error");
+                ctx.output.setData(new ArrayList<>());
+            }   
         }
-        return re;
+
+        return new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
     }
 }

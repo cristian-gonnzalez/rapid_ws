@@ -11,10 +11,14 @@ import com.meli.backend.rapid.common.CMutext;
 import com.meli.backend.rapid.common.AppStatus.eRCode;
 import com.meli.backend.rapid.req_ctx.ConcertRequestContext;
 import com.meli.backend.rapid.req_ctx.DelReserveRequestContext;
+import com.meli.backend.rapid.req_ctx.GetReserveRequestContext;
 import com.meli.backend.rapid.req_ctx.ReserveRequestContext;
 import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertInput;
 import com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput;
+import com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput.ConcertInfo;
+import com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput.Total;
 import com.meli.backend.rapid.ws.models.SectorRecord;
+import com.meli.backend.rapid.ws.models.User;
 import com.meli.backend.rapid.ws.models.ConcertRecord;
 import com.meli.backend.rapid.ws.models.ReserveRecord;
 import com.meli.backend.rapid.ws.repositories.*;
@@ -84,12 +88,53 @@ public class ReserveService {
         concertinfo.setConcertDate(ctx.input.getConcertDate() );
         concertinfo.setSector(concertService.sectorRecordToOutput(s));
 
-        com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput.UserInfo  userinfo = reserve.getUserInfo();
+        User  userinfo = reserve.getUserInfo();
         userinfo.setName(ctx.input.getName());
         userinfo.setSurname(ctx.input.getSurname());
         userinfo.setDNI(ctx.input.getDNI());
 
     }
+
+
+
+    public ReserveOutput reserveRecordToOutput( ReserveRecord record ) {
+        ReserveOutput output = new ReserveOutput();
+        
+        output.setDatetime(record.getDatetime());
+        output.setReserveId(record.getReserveKey().getReserveId());
+        
+        output.setUserInfo(record.getUser());
+        
+        ConcertInfo concertInfo = output.getConcertInfo();
+        concertInfo.setArtist(record.getConcert().getArtist());
+        concertInfo.setPlace(record.getConcert().getPlace());
+        concertInfo.setConcertDate(record.getReserveKey().getSectorKey().getConcerKey().getConcertDate() );
+        concertInfo.setSector(concertService.sectorRecordToOutput( record.getConcert().getSectors().get(0) ));
+        output.setConcertInfo(concertInfo);
+
+        Total totalInfo = output.getTotalInfo();
+        totalInfo.setPrice(record.getConcert().getSectors().get(0).getPrice());
+        totalInfo.setQuantity(record.getQuantity());
+        totalInfo.setTotal(record.geTotalAmount());
+        output.setTotalInfo(totalInfo);
+
+        return output;
+    }
+
+    public List<ReserveOutput> reserveRecordsToOutputs( List<ReserveRecord> records ) {
+        List<ReserveOutput> outputs = new ArrayList<>();
+        for(int i=0; i<records.size(); i++) {
+            outputs.add(reserveRecordToOutput(records.get(i)));
+        }
+        return outputs;
+    }
+
+
+    public List<ReserveOutput> getReserves(GetReserveRequestContext ctx ) throws SQLException {
+        List<ReserveRecord> reserveRecords = reserveRepository.getReserves(ctx);
+        return reserveRecordsToOutputs( reserveRecords );
+    }
+
 
     /** Make the reserve of the concert
      * 

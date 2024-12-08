@@ -32,17 +32,13 @@ public class ConcertController {
         List<ConcertOutput> concerts = concertService.getAllConcerts(ctx);
         ctx.output.setData(concerts);
 
-        ResponseEntity<RequestOutput> re =  null;
-        try {
-            re = new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
-        } catch (Exception e) {
-        }
-        return re;
+        return new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
     }
 
     
     @GetMapping("/range")
     public ResponseEntity<RequestOutput> getConcertsByRange(@RequestParam(name = "rec_num", defaultValue = "0") int rec_num, @RequestParam(name = "offset", defaultValue = "30") int offset, @RequestBody (required=false) ConcertRangeInput input) {
+        // prepares the context 
         ConcertRgRequestContext ctx = new ConcertRgRequestContext( input );
         ctx.reqParam.setRecNum(rec_num);
         ctx.reqParam.setOffset(offset);
@@ -50,11 +46,6 @@ public class ConcertController {
         List<ConcertOutput> concerts = concertService.getConcertsByRange(ctx);
         ctx.output.setData(concerts);
         
-        ResponseEntity<RequestOutput> re =  null;
-        try {
-            re = new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
-        } catch (Exception e) {
-        }
-        return re;
+        return new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
     }
 }
