@@ -3,7 +3,7 @@
  **/
 package com.meli.backend.rapid.common;
 
-public class RecordOutParam {
+public class RequestParam {
 
     /** Record number to start giving in the response. */
     private int rec_num;
@@ -14,7 +14,9 @@ public class RecordOutParam {
     /** Initializes.
      * 
      */
-    public RecordOutParam() {
+    public RequestParam() {
+        this.rec_num = 0;
+        this.offset = 100;
     }
 
     public void setRecNum( int rec_num ) {

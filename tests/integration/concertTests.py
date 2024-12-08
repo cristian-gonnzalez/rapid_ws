@@ -39,7 +39,7 @@ def artistGetRequestResonseOneRecordTest():
     r = response['data'][0]
     assert r['artist'] == 'ARTIST_2', r['artist']
     assert r['place'] == 'PLACE_1', r['place']
-    assert len(r['concertSector']) == 1, len(r['concertSector'])
+    assert len(r['sectors']) == 1, len(r['sectors'])
     
     
 
@@ -135,17 +135,17 @@ def assertResponseFields( response ):
 
     assert 'data' in response.keys()
 
-    data_fields = ['artist', 'place', 'concertDate', 'concertTime', 'concertSector']
+    data_fields = ['artist', 'place', 'concertDate', 'concertTime', 'sectors']
     concertSector_fields = ['name', 'price', 'roomSpace', 'occupiedSpace', 'hasSeat', 'seats']
 
     record = response['data'][0]
     for k in data_fields:
-        assert k in list( record.keys() ), "Missing field %s in 'data'" % k
+        assert k in list( record.keys() ), "Missing field %s in 'data'\n%s" % ( k, response)
 
-    if len( record['concertSector'] ) > 0:
-        sector = record['concertSector'][0]
+    if len( record['sectors'] ) > 0:
+        sector = record['sectors'][0]
         for k in concertSector_fields:
-            assert k in list( sector.keys() ), "Missing field %s in 'data'->'concertSector'" % k
+            assert k in list( sector.keys() ), "Missing field %s in 'data'->'sectors'" % k
     
 
 def checksResponseFields():

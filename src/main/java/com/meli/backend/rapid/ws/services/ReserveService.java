@@ -1,5 +1,7 @@
 package com.meli.backend.rapid.ws.services;
 
+import java.sql.Date;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,14 +9,14 @@ import org.springframework.stereotype.Service;
 
 import com.meli.backend.rapid.common.CMutext;
 import com.meli.backend.rapid.common.AppStatus.eRCode;
+import com.meli.backend.rapid.req_ctx.ConcertRequestContext;
 import com.meli.backend.rapid.req_ctx.DelReserveRequestContext;
 import com.meli.backend.rapid.req_ctx.ReserveRequestContext;
+import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertInput;
 import com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput;
-import com.meli.backend.rapid.ws.models.ConcertSector;
-import com.meli.backend.rapid.ws.models.TicketReserve;
-import com.meli.backend.rapid.ws.models.TicketReserve.Concert;
-import com.meli.backend.rapid.ws.models.TicketReserve.Total;
-import com.meli.backend.rapid.ws.models.TicketReserve.User;
+import com.meli.backend.rapid.ws.models.SectorRecord;
+import com.meli.backend.rapid.ws.models.ConcertRecord;
+import com.meli.backend.rapid.ws.models.ReserveRecord;
 import com.meli.backend.rapid.ws.repositories.*;
 
 @Service
@@ -22,79 +24,72 @@ public class ReserveService {
 
     ReserveRepository reserveRepository;
     ConcertRepository concertRepository;
-    ConcertSectorRepository concertSectorRepository;
-    
+    ConcertService concertService;
+
     public ReserveService() {
         this.reserveRepository = new ReserveRepository();
-        concertRepository = new ConcertRepository();
-        concertSectorRepository = new ConcertSectorRepository();
+        this.concertRepository = new ConcertRepository();
+        this.concertService = new ConcertService();
     }
 
-    private double calculateSectorWithSeats( ReserveRequestContext ctx, ConcertSector cs ) {
-        
-        List<Integer> seats = ctx.input.getSeats();
-        
-        // checks that there is room for the seats
-        if( cs.getOccupiedSpace() + seats.size() > cs.getRoomSpace() ) {
-            ctx.setError(eRCode.noRoomAvailable , "No space available. The free space for sector "+ ctx.input.getSector() +" is " + ( cs.getRoomSpace() - cs.getOccupiedSpace() ) );
-            return -1;
+    private ConcertRecord getSector( ReserveRequestContext ctx, String artist, String place, Date concertDate, String sectorname  ) {
+        List<ConcertRecord> concerts = null;
+        try {
+            ConcertInput input = new ConcertInput();
+            input.setArtist(artist);
+            input.setPlace(place);
+            input.setConcertDate(concertDate);
+
+            concerts = concertRepository.getConcerts( new ConcertRequestContext(input));        
+        }
+        catch( Exception e) {
+        }
+
+        if( concerts == null || concerts.size() == 0) {
+            ctx.setError(eRCode.valueNotFound, "Concert not found");
+            return null;
         }
         
-        List<Integer> ocupies = new ArrayList<>();
+        boolean found = false;
+        ConcertRecord concert = concerts.get(0);
+        List<SectorRecord> sectors = concerts.get(0).getSectors();
 
-        List<Integer> reserveds = cs.getSeats();
-        for(int i = 0; i<reserveds.size(); i++) {
-            for(int j = 0; j<seats.size(); j++) {
- 
-                /* checks that the seat num is not reserved */
-                if(seats.get(j) == reserveds.get(i) ) {
-                    ocupies.add(seats.get(j));
-                }
+        for(int i = 0;  i < sectors.size(); i++)
+        {
+            SectorRecord s = sectors.get(i);
+                
+            if(s.getName().equals( sectorname ) ) {
+                List<SectorRecord> aux =  new ArrayList<>();
+                aux.add(s);
+                concert.setSectors(aux);
 
-                /* checks that the seat num is between the 1 and size of room space */
-                if( seats.get(j) <= 0 || seats.get(j) > cs.getRoomSpace() ) {
-                    ctx.setError(eRCode.invalidFields, "Invalid seat number for "+ ctx.input.getSector());
-                    return -1;
-                }
+                found = true;
+                break;
             }
         }
 
-        if( !ocupies.isEmpty() ) {
-            String errmsg ="The seats [";
-            for(int i = 0; i<ocupies.size(); i++) {
-                errmsg += ocupies.get(i);
-                if(i != ocupies.size()-1) {
-                    errmsg +=", ";
-                }
-            }
-            errmsg +="] are reserved";
-            
-            ctx.setError( eRCode.seatReserved , errmsg);
-            return -1;
+        if( !found ) {
+            ctx.setError(eRCode.valueNotFound, "Sector not found");
+            return null;
         }
 
-        double total_amount = cs.getPrice() * ctx.input.getSeats().size();
-
-        return total_amount;
+        return concert;
     }
 
-    private double calculateSectorWithQty( ReserveRequestContext ctx, ConcertSector cs ) {
+    private void buildTicketReserve( ReserveOutput reserve, ReserveRequestContext ctx, SectorRecord s ) {
 
-        if( cs.getHasSeat() ) {
-            ctx.setError( eRCode.invalidFields, "Invalid field contents. The sector " + ctx.input.getSector() + " required to specify seat numbers" );
-            return -1;
-        }
+        com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput.ConcertInfo concertinfo = reserve.getConcertInfo();
+        concertinfo.setArtist( ctx.input.getArtist() );
+        concertinfo.setPlace( ctx.input.getPlace() );
+        concertinfo.setConcertDate(ctx.input.getConcertDate() );
+        concertinfo.setSector(concertService.sectorRecordToOutput(s));
 
-        if( cs.getOccupiedSpace() + ctx.input.getQuantity() > cs.getRoomSpace() ) {
-            ctx.setError( eRCode.noRoomAvailable, "No space available. The free space for sector "+ ctx.input.getSector() +" is " + ( cs.getRoomSpace() - cs.getOccupiedSpace() ) );
-            return -1;
-        }
+        com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput.UserInfo  userinfo = reserve.getUserInfo();
+        userinfo.setName(ctx.input.getName());
+        userinfo.setSurname(ctx.input.getSurname());
+        userinfo.setDNI(ctx.input.getDNI());
 
-        double total_amount = cs.getPrice() * ctx.input.getQuantity();
-
-        return total_amount;
     }
-
 
     /** Make the reserve of the concert
      * 
@@ -102,113 +97,118 @@ public class ReserveService {
      */
     public void reserveConcert( ReserveRequestContext ctx) {
 
-        TicketReserve reserve = ((ReserveOutput)( ctx.output.getData() ) ).getTicketReserve();
-        ConcertSector cs;
-
+        ReserveOutput reserve = (ReserveOutput)ctx.output.getData();
+        
         synchronized(CMutext.getInstance()) {
 
-            if( !concertRepository.existsConcert( ctx.input.getArtist(), ctx.input.getPlace(), ctx.input.getConcertDate(), ctx.input.getSector() ) ) {
-                ctx.setError( eRCode.valueNotFound, "No concert found for artist: " + ctx.input.getArtist() + 
-                                                             " place: " + ctx.input.getPlace() + 
-                                                             " concertDate: " + ctx.input.getConcertDate() + 
-                                                             " sector: " + ctx.input.getSector() );
+            ConcertRecord c = getSector(ctx, ctx.input.getArtist(), 
+                                             ctx.input.getPlace(), 
+                                             ctx.input.getConcertDate(), 
+                                             ctx.input.getSector() );
+            if(ctx.isOnError())
                 return;
-            }
-        
-            int artistId = concertRepository.getArtistID(ctx.input.getArtist());
-            int placeId = concertRepository.getPlaceID(ctx.input.getPlace());
-            int sectorId = concertRepository.getSectorID(artistId, placeId, ctx.input.getConcertDate(), ctx.input.getSector());
-        
-            List<ConcertSector> sectors = concertSectorRepository.getConcertSectors(null, artistId, placeId, ctx.input.getConcertDate(), ctx.input.getSector());
-            cs = sectors.get(0);
 
+            List<SectorRecord> sectors = c.getSectors();
+            SectorRecord s = sectors.get(0);
+
+            com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput.Total total = reserve.getTotalInfo();            
             double total_amount = 0;
-            int qty = 0;
-            if( ctx.input.getQuantity() != null) {
-                total_amount = calculateSectorWithQty( ctx, cs );
-                qty = ctx.input.getQuantity();
+            if( s.getHasSeat() ) {
+                if( ctx.input.getQuantity() != null) {
+                    ctx.setError(eRCode.invalidFields, "seats field is required");
+                    return;
+                }
+                
+                List<Integer> reservedseats = s.getSeats();
+                List<Integer> seats = ctx.input.getSeats();
+
+                int newOcupiedSpace =  s.getOccupiedSpace() + seats.size();
+                if( newOcupiedSpace > s.getRoomSpace() ) {
+                    ctx.setError(eRCode.noRoomAvailable, "No room is availble");
+                    return;
+                }
+
+                for(int i=0; i<reservedseats.size(); i++) {
+                    for(int j=0; j<seats.size(); j++) {            
+                        
+                        if( seats.get(j) <= 0 || seats.get(j) > seats.size() ) {
+                            ctx.setError(eRCode.invalidFields, "Seat number out of bounds");
+                            return;   
+                        }
+                        
+                        if( reservedseats.get(i).equals(seats.get(j)) ) {
+                            ctx.setError(eRCode.seatReserved, "Seat number is ocuppied");
+                            return;
+                        }
+                    }    
+                }
+
+                total_amount = s.getPrice() * seats.size();
+
+                total.setQuantity(seats.size());
+                
+                s.setSeats(seats);
+                s.setOccupiedSpace(newOcupiedSpace);
             }
             else {
-                total_amount = calculateSectorWithSeats( ctx, cs );
-                qty = ctx.input.getSeats().size();
-            
+
+                if( ctx.input.getSeats() != null) {
+                    ctx.setError(eRCode.invalidFields, "qty field is required");
+                    return;
+                }
+
+                int newOcupiedSpace = s.getOccupiedSpace() + ctx.input.getQuantity() ;
+                if( s.getOccupiedSpace() + ctx.input.getQuantity() > s.getRoomSpace() ) {
+                    ctx.setError(eRCode.noRoomAvailable, "No room is availble");
+                    return;
+                }
+
+                total.setQuantity(ctx.input.getQuantity());
+                total_amount = s.getPrice() * ctx.input.getQuantity();
+
+                s.setOccupiedSpace(newOcupiedSpace);
             }
+
+            total.setPrice(s.getPrice());
+            total.setTotal(total_amount);
 
             if( ctx.isOnError() ) {
                 return;
             }
-
-            Concert concertinfo = reserve.getConcertInfo();
-            concertinfo.setArtist( ctx.input.getArtist() );
-            concertinfo.setPlace( ctx.input.getPlace() );
-            concertinfo.setConcerDate(ctx.input.getConcertDate() );
-            concertinfo.setSector(ctx.input.getSector());
-            concertinfo.setSeats(ctx.input.getSeats());
             
-            Total totalinfo = reserve.getTotalInfo();
-            totalinfo.setPrice(cs.getPrice());
-            totalinfo.setQuantity(qty);
-            totalinfo.setTotal(total_amount);
-
-            User userinfo = reserve.getUser();
-            userinfo.setName(ctx.input.getName());
-            userinfo.setSurname(ctx.input.getSurname());
-            userinfo.setDNI(ctx.input.getDNI());
+            buildTicketReserve(reserve, ctx, s);
+            
             try {
-                boolean r = reserveRepository.saveReserve(reserve, artistId, placeId, ctx.input.getConcertDate(), sectorId, ctx.input.getSeats(), cs );
+                Boolean r = reserveRepository.saveReserve( ctx, reserve, s );
                 if( !r ) {
-                    ctx.setError(eRCode.failToApllyEffect, "Fail to save the reserve");
+                    ctx.setError(eRCode.failToApllyEffect, "Error when saving reserve");
                 }    
             } catch (Exception e) {
                 // TODO: handle exception
             }
-
-            
         }
     }
 
     
-    public void deleteReserve( DelReserveRequestContext ctx ) {
+    public void deleteReserve( DelReserveRequestContext ctx ) throws SQLException {
 
-        int artistId = concertRepository.getArtistID(ctx.input.getArtist());
-        int placeId = concertRepository.getPlaceID(ctx.input.getPlace());
-        int sectorId = concertRepository.getSectorID(artistId, placeId, ctx.input.getConcertDate(), ctx.input.getSector());
-
-        List<ConcertSector> sectors = concertSectorRepository.getConcertSectors(null, artistId, placeId, ctx.input.getConcertDate(), ctx.input.getSector() );
-        if( sectors.size() == 0 ) {
-            ctx.setError( eRCode.valueNotFound, "Sector not found");
-        }
-
-        ConcertSector cs = sectors.get(0);
-        if( !cs.getHasSeat() && ctx.input.getSeats().size() > 0 ) {
-            ctx.setError( eRCode.invalidFields, "The sector has not seats section");            
-        }
-
-        for( int i=0; i< ctx.input.getSeats().size(); i++ ) {
-            boolean found = false;
-            for( int j=0; j< cs.getSeats().size(); j++ ) {
-                if( ctx.input.getSeats().get(i) == cs.getSeats().get(j)) {
-                    found = true;
-                    break;
-                }
-            }    
-
-            if( !found ){
-                ctx.setError( eRCode.invalidFields, "The seats was not found");
-                break;            
-            }
-        }
-        
-        if( ctx.isOnError()) {
+        ReserveRecord rec = reserveRepository.getReserve( ctx );
+        if(rec == null ){
+            ctx.setError(eRCode.valueNotFound, "Reserve not found");
             return;
         }
-
         synchronized(CMutext.getInstance()) {
             try {
-                reserveRepository.deleteReserve(ctx.input.getReserveId(), artistId, placeId, ctx.input.getConcertDate(), sectorId, cs.getSeats(), cs );           
+
+                int occupiedSpace = rec.getConcert().getSectors().get(0).getOccupiedSpace();
+                occupiedSpace -= rec.getQuantity();
+                rec.getConcert().getSectors().get(0).setOccupiedSpace(occupiedSpace);
+                
+                reserveRepository.deleteReserve( rec );           
             } catch (Exception e) {
                 // TODO: handle exception
             }
         }
+       
     }
 }

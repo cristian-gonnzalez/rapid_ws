@@ -2,7 +2,9 @@ package com.meli.backend.rapid.ws.models;
 
 import java.util.*;
 
-public class ConcertSector {
+public class SectorRecord {
+
+    SectorKey sectorKey;
 
     private String name;
 
@@ -16,8 +18,17 @@ public class ConcertSector {
 
     private List<Integer> seats;
 
-    public ConcertSector() {
+    public SectorRecord() {
         this.seats = new ArrayList<>();
+    }
+
+    
+    public void setSetorKey(SectorKey key ) {
+        this.sectorKey = key;
+    }
+
+    public SectorKey getSetorKey() {
+        return this.sectorKey;
     }
 
     public void setPrice(double price ) {

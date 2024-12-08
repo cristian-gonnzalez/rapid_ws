@@ -1,10 +1,12 @@
-package com.meli.backend.rapid.common;
+package com.meli.backend.rapid.db;
 
 import java.sql.*;
 
 public class DataBase {
     
     private Connection conn = null;
+    private Statement stmt = null;
+    private ResultSet rs = null;
         
     public DataBase() {
         try {
@@ -12,20 +14,6 @@ public class DataBase {
         } 
         catch (ClassNotFoundException ex) {
         }
-    }
-
-    public void begin() throws SQLException {
-        conn.setAutoCommit(false);
-    }
-
-    public void rollback()  throws SQLException {
-        conn.rollback();
-        conn.setAutoCommit(true);
-    }
-   
-    public void commit()  throws SQLException {
-        conn.commit();
-        conn.setAutoCommit(true);
     }
 
     public Boolean connect() {
@@ -55,8 +43,20 @@ public class DataBase {
         return true;
     }
 
-    public Statement stmt = null;
-    ResultSet rs = null;
+    public void begin() throws SQLException {
+        conn.setAutoCommit(false);
+    }
+
+    public void rollback()  throws SQLException {
+        conn.rollback();
+        conn.setAutoCommit(true);
+    }
+   
+    public void commit()  throws SQLException {
+        conn.commit();
+        conn.setAutoCommit(true);
+    }
+
 
     public void prepareStmt() {
         try {
@@ -76,7 +76,6 @@ public class DataBase {
         return (x > 0);
     }
 
-
     public void closeStmt() {
         try {
             if( rs != null)
@@ -86,7 +85,6 @@ public class DataBase {
             System.out.println(e);
         }
         rs = null;
-        stmt = null;
-        
+        stmt = null;        
     }
 }

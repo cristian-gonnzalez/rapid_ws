@@ -3,9 +3,15 @@ package com.meli.backend.rapid.ws.repositories;
 import java.sql.*;
 import java.util.List;
 
-import com.meli.backend.rapid.common.DataBase;
-import com.meli.backend.rapid.ws.models.ConcertSector;
-import com.meli.backend.rapid.ws.models.TicketReserve;
+import com.meli.backend.rapid.db.DataBase;
+import com.meli.backend.rapid.db.ReserveSql;
+import com.meli.backend.rapid.db.ReserveStmt;
+import com.meli.backend.rapid.req_ctx.DelReserveRequestContext;
+import com.meli.backend.rapid.req_ctx.ReserveRequestContext;
+import com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput;
+import com.meli.backend.rapid.req_ctx.req_ctx_io.SectorOutput;
+import com.meli.backend.rapid.ws.models.SectorRecord;
+import com.meli.backend.rapid.ws.models.ReserveRecord;
 
 public class ReserveRepository {
 
@@ -78,14 +84,17 @@ public class ReserveRepository {
         return id;
     }
 
-    private boolean insertReservedSeats(DataBase db, int reserveId,  int artistId, int placeId, Date concertDate, int sectorId, List<Integer> seats) throws SQLException {
-            String values ="";
+    private boolean insertReservedSeats(DataBase db, ReserveOutput reserve, SectorRecord sector_rec ) throws SQLException {
+            
+        
+        List<Integer> seats = sector_rec.getSeats();
+        String values ="";
             for(int i=0; i<seats.size(); i++) {
-                values += "( "+ reserveId + ", " + 
-                                artistId + ", " + 
-                                placeId + ", " +  
-                          "'" + concertDate + "', " +  
-                                sectorId + ", " + 
+                values += "( "+ reserve.getReserveId() + ", " + 
+                sector_rec.getSetorKey().getConcerKey().getArtistId() + ", " + 
+                sector_rec.getSetorKey().getConcerKey().getPlaceId() + ", " +  
+                          "'" + sector_rec.getSetorKey().getConcerKey().getConcertDate() + "', " +  
+                          sector_rec.getSetorKey().getSectorId() + ", " + 
                             seats.get(i) + ")";
                 
                 if( i != seats.size() -1 )
@@ -96,15 +105,31 @@ public class ReserveRepository {
             return execsql(db, sql);    
     }
 
-    private boolean updateConcertSector(DataBase db,int artistId, int placeId, Date concertDate, int sectorId, int occupiedSpace) throws SQLException {
+    private boolean updateConcertSector(DataBase db, SectorRecord cs) throws SQLException {
         String sql = "update ConcertSector " + 
-                         "set occupiedSpace = " + occupiedSpace + " " +
-                         " where artistId = " + artistId + " and " + 
-                               " placeId = " + placeId  + " and " + 
-                               " concertDate = '" + concertDate  + "' and " + 
-                               " sectorId = " + sectorId  + ";";
+                         "set occupiedSpace = " + cs.getOccupiedSpace() + " " +
+                         " where artistId = " + cs.getSetorKey().getConcerKey().getArtistId() + " and " + 
+                               " placeId = " + cs.getSetorKey().getConcerKey().getPlaceId()  + " and " + 
+                               " concertDate = '" + cs.getSetorKey().getConcerKey().getConcertDate()  + "' and " + 
+                               " sectorId = " + cs.getSetorKey().getSectorId()  + ";";
         return execsql(db, sql);
      }
+
+
+    public Boolean insertReserve(DataBase db, ReserveOutput reserve, SectorRecord sector_rec ) throws SQLException {
+        String sql = "insert into Reserve (`artistId`, `placeId`, `concertDate`, `sectorId`, `qty`, `name`, `surname`, `dni`, `total`) values " +
+        "( "+ sector_rec.getSetorKey().getConcerKey().getArtistId() + ", "+ 
+              sector_rec.getSetorKey().getConcerKey().getPlaceId() + ", " +  
+        "'" + sector_rec.getSetorKey().getConcerKey().getConcertDate() + "', " +  
+              sector_rec.getSetorKey().getSectorId() + ", " + 
+              reserve.getTotalInfo().getQuantity()  + ", " + 
+        "'" + reserve.getUserInfo().getName()  + "', " + 
+        "'" + reserve.getUserInfo().getSurname()  + "', " + 
+              reserve.getUserInfo().getDNI()  + ", " + 
+              reserve.getTotalInfo().getTotal() + ");"; 
+        return execsql(db, sql);
+            
+    }
 
     /** Saves the reserve and udpate tables
      * 
@@ -117,20 +142,10 @@ public class ReserveRepository {
      * @param cs The sector of concert.
      * @return true if success, false otherwise.
      */
-    public boolean saveReserve(TicketReserve reserve, int artistId, int placeId, Date concertDate, int sectorId, List<Integer> seats, ConcertSector cs) throws SQLException {
+    public Boolean saveReserve(ReserveRequestContext ctx, ReserveOutput reserve, SectorRecord sector_rec ) throws SQLException {
 
-        String sql = "insert into Reserve (`artistId`, `placeId`, `concertDate`, `sectorId`, `qty`, `name`, `surname`, `dni`, `total`) values " +
-        "( "+ artistId + ", "+ 
-                placeId + ", " +  
-        "'" + concertDate + "', " +  
-                sectorId + ", " + 
-                reserve.getTotalInfo().getQuantity()  + ", " + 
-        "'" + reserve.getUser().getName()  + "', " + 
-        "'" + reserve.getUser().getSurname()  + "', " + 
-                reserve.getUser().getDNI()  + ", " + 
-                reserve.getTotalInfo().getTotal() + ");"; 
+        Boolean r = false;
         
-        boolean r = false;
         DataBase db = new DataBase();
         db.connect();
         
@@ -138,8 +153,9 @@ public class ReserveRepository {
             
             db.begin();
 
-            r = execsql(db, sql);
+            r = insertReserve(db, reserve, sector_rec);
             if( !r ) {
+                System.err.println("Failed to save reserve in table");
                 db.rollback();
                 db.disconnect();
                 return r;
@@ -147,17 +163,24 @@ public class ReserveRepository {
         
             reserve.setReserveId( getLastID(db) );
             reserve.setDatetime( getLastDatetime(db) );
-            int occupiedSpace = cs.getOccupiedSpace() + reserve.getTotalInfo().getQuantity();
-            
-            r =updateConcertSector( db, artistId, placeId, concertDate, sectorId, occupiedSpace );
+
+            SectorOutput cs = reserve.getConcertInfo().getSector();
+            r = updateConcertSector( db, sector_rec );
             if( !r ) {
+                System.err.println("Failed to update sector in table");
                 db.rollback();
                 db.disconnect();
                 return r;
             }
             
-            if( seats.size() > 0) {
-                insertReservedSeats(db, reserve.getReserveId(), artistId, placeId, concertDate, sectorId, seats);
+            if( cs.getHasSeat() ) {
+                r = insertReservedSeats(db, reserve, sector_rec );
+                if( !r ) {
+                    System.err.println("Failed to save seats in table");
+                    db.rollback();
+                    db.disconnect();
+                    return r;
+                }
             }
             
             db.commit();
@@ -169,12 +192,36 @@ public class ReserveRepository {
         return r;
     }
 
-    public boolean deleteReserve(int reserveId, int artistId, int placeId, Date concertDate, int sectorId, 
-                                 List<Integer> seats, ConcertSector cs ) throws SQLException {
+    public ReserveRecord getReserve(DelReserveRequestContext ctx) throws SQLException{
 
-        int qty = getReserveQuantity(reserveId, artistId, placeId, concertDate, sectorId);
+        ReserveStmt stmt = new ReserveStmt();
+        stmt.setReserveId(ctx.input.getReserveId());
+        stmt.setArtist(ctx.input.getArtist());
+        stmt.setPlace(ctx.input.getPlace());
+        stmt.setDate(ctx.input.getConcertDate());
+        stmt.setSector(ctx.input.getSector());
+
+        DataBase db = new DataBase();
+        db.connect();
+        ReserveSql sql = new ReserveSql(db, stmt);
+        List<ReserveRecord> reserveRecords = sql.read();
+        db.disconnect();
+
+        if( reserveRecords.size() > 0 )
+            return reserveRecords.get(0);
+
+        return null;
+    } 
+
+    
+    public boolean deleteReserve(ReserveRecord rec) throws SQLException {
         
-        
+        String wsql = " where reserveId = " + rec.getReserveKey().getReserveId() + " and " + 
+        " artistId = " + rec.getReserveKey().getSectorKey().getConcerKey().getArtistId() + " and " + 
+        " placeId = " + rec.getReserveKey().getSectorKey().getConcerKey().getPlaceId()  + " and " + 
+        " concertDate = '" + rec.getReserveKey().getSectorKey().getConcerKey().getConcertDate()  + "' and " + 
+        " sectorId = " + rec.getReserveKey().getSectorKey().getSectorId()  + ";";
+
         boolean r = false;
         DataBase db = new DataBase();
         db.connect();
@@ -183,37 +230,35 @@ public class ReserveRepository {
             db.begin();
 
             String sql;    
-            if( seats.size() > 0) {
-                sql = "delete from Seat " +
-                " where reserveId = " + reserveId + " and " + 
-                " artistId = " + artistId + " and " + 
-                " placeId = " + placeId  + " and " + 
-                " concertDate = '" + concertDate  + "' and " + 
-                " sectorId = " + sectorId  + ";";
+            if( rec.getConcert().getSectors().get(0).getHasSeat()) {
+                
+                sql = "delete from Seat " + wsql;
                 r = execsql(db, sql);
+                if(!r) {
+                    System.err.println("Failed to delete seats");    
+                    db.rollback();
+                    db.disconnect();
+                    return r;
+                }
             }
 
-            sql = "delete from Reserve " +
-                    " where reserveId = " + reserveId + " and " + 
-                    " artistId = " + artistId + " and " + 
-                    " placeId = " + placeId  + " and " + 
-                    " concertDate = '" + concertDate  + "' and " + 
-                    " sectorId = " + sectorId  + ";";
+            sql = "delete from Reserve " + wsql;
             r = execsql(db, sql);
             if( !r ) {
+                System.err.println("Failed to delete reserve");    
                 db.rollback();
                 db.disconnect();
                 return r;
             }
         
-            int occupiedSpace = cs.getOccupiedSpace() - qty;
-            r =updateConcertSector( db, artistId, placeId, concertDate, sectorId, occupiedSpace );
+            
+            r =updateConcertSector( db, rec.getConcert().getSectors().get(0) );
             if( !r ) {
+                System.err.println("Failed to update sector");    
                 db.rollback();
                 db.disconnect();
                 return r;
             }
-            
             
             db.commit();
         } catch (SQLException e) {
@@ -222,40 +267,5 @@ public class ReserveRepository {
     
         db.disconnect();
         return r;
-    }
-
-
-
-     private int getReserveQuantity( int reserveId, int artistId, int placeId, Date concertDate, int sectorId)  {
-        
-        int qty = 0;
-      
-        DataBase db = new DataBase();
-
-        db.connect();
-        db.prepareStmt();
-        String querystr = "select qty from Reserve " +
-                          " where reserveId = " + reserveId + " and " + 
-                          " artistId = " + artistId + " and " + 
-                          " placeId = " + placeId  + " and " + 
-                          " concertDate = '" + concertDate  + "' and " + 
-                          " sectorId = " + sectorId  + ";";
-        System.out.println(querystr);
-
-        try {
-            ResultSet rs = db.execute(querystr);
-            
-            while (rs.next()) {
-                qty = rs.getInt("qty");
-            }
-
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-
-        db.closeStmt();
-        db.disconnect();
-
-        return qty;
     }
 }

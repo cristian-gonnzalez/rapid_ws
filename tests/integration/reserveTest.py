@@ -13,21 +13,20 @@ reserve_id = None
 
 
 def assertFieldsResponse( response ):
-    ticket_reserve = ['datetime', 'reserveId', 'totalInfo', 'user', 'concertInfo']
-    concert_info = ['artist', 'artist', 'concerDate', 'sector', 'seats']
+    ticket_reserve = ['datetime', 'reserveId', 'totalInfo', 'userInfo', 'concertInfo']
+    concert_info = ['artist', 'place', 'concertDate', 'sector']
     user = ['name', 'surname', 'dni']
     total_info = ['price', 'total', 'quantity']
     
     assert 'data' in response.keys()
-    assert 'ticketReserve' in response['data'].keys()
     for k in ticket_reserve:
-        assert k in response['data']['ticketReserve'].keys()
+        assert k in response['data'].keys(), response['data'].keys()
     for k in total_info:
-        assert k in response['data']['ticketReserve']['totalInfo'].keys()
+        assert k in response['data']['totalInfo'].keys(), response['data']['totalInfo'].keys() 
     for k in concert_info:
-        assert k in response['data']['ticketReserve']['concertInfo'].keys()
+        assert k in response['data']['concertInfo'].keys(), "%s != %s " % (k, response['data']['concertInfo'].keys() )
     for k in user:
-        assert k in response['data']['ticketReserve']['user'].keys()
+        assert k in response['data']['userInfo'].keys(), "%s != %s " % (k, response['data']['userInfo'].keys() )
 
 
 def reserveResponse200Test():
@@ -44,15 +43,15 @@ def reserveResponse200Test():
         "dni": "12123123"
     }
     response = requests.post(url, data=json.dumps(data), headers=headers)
+    print(response.json())
     assert response.status_code == 200, response.status_code
     response = assert_reponse( response )
-    print(response)
     
     assert isinstance(response['data'], dict)
     assert response['appStatus']['code'] == 'success', response['appStatus']['code']
     assertFieldsResponse( response )
     global reserve_id
-    reserve_id = response['data']['ticketReserve']['reserveId']
+    reserve_id = response['data']['reserveId']
 
 
 def deleteReserveResponse200Test():
@@ -104,8 +103,8 @@ if __name__ == '__main__':
 
     tests = [
         test_runner(reserveResponse200Test),
-        test_runner(deleteReserveResponse200Test),
-        test_runner(reserveDuplicatedResponseFailedTest)
+        test_runner(reserveDuplicatedResponseFailedTest),
+        test_runner(deleteReserveResponse200Test)
     ]
 
     print("Running " + os.path.basename(__file__) + "\n" )

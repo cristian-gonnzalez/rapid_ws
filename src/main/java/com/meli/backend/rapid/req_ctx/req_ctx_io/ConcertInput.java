@@ -1,10 +1,11 @@
 package com.meli.backend.rapid.req_ctx.req_ctx_io;
 
-import java.util.*;
+
+import java.sql.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-
+/** Contains the request body for a concert object. */
 public class ConcertInput {
     
     String artist;

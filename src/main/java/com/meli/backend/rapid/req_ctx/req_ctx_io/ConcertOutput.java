@@ -4,8 +4,8 @@ import java.sql.Time;
 import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.meli.backend.rapid.ws.models.ConcertSector;
 
+/** Contains the output when the API returns data. */
 public class ConcertOutput {
 
     private String artist;
@@ -17,19 +17,18 @@ public class ConcertOutput {
     
     private Time concertTime;
     
-    private List<ConcertSector> sectors;
+    private List<SectorOutput> sectors;
 
     public ConcertOutput() {
     }
 
-    public void setConcertSector(List<ConcertSector> sectors) {
+    public void setSectors(List<SectorOutput> sectors) {
         this.sectors = sectors;
     }
 
-    public List<ConcertSector> getConcertSector() {
+    public List<SectorOutput> getSectors() {
         return this.sectors;
     }
-
 
     public void setConcertTime( Time time ) {
         this.concertTime = time;

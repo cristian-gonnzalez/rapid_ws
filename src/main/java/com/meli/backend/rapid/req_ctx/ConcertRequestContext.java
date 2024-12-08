@@ -3,7 +3,7 @@
  */
 package com.meli.backend.rapid.req_ctx;
 
-import com.meli.backend.rapid.common.RecordOutParam;
+import com.meli.backend.rapid.common.RequestParam;
 import com.meli.backend.rapid.req_ctx.req_ctx_io.*;
 
 /** Concert request context.
@@ -12,7 +12,7 @@ import com.meli.backend.rapid.req_ctx.req_ctx_io.*;
 public class ConcertRequestContext  extends RequestContext {
     
     /** Request paramaters that specifies the number of records to give in the ouput */
-    public RecordOutParam recOutParam;
+    public RequestParam reqParam;
 
     /** Input request fields */
     public ConcertInput input;
@@ -27,6 +27,6 @@ public class ConcertRequestContext  extends RequestContext {
         if( this.input == null ) {
             this.input = new ConcertInput();
         }
-        recOutParam = new RecordOutParam();
+        reqParam = new RequestParam();
     }
 }

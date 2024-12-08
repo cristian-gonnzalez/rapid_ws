@@ -6,6 +6,7 @@ package com.meli.backend.rapid.ws.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.meli.backend.rapid.req_ctx.req_ctx_io.*;
@@ -30,42 +31,38 @@ public class ConcertController {
         this.concertService = concertService;
     }
 
-    @GetMapping
-    public RequestOutput getAllConcerts(@RequestParam(name = "rec_num", defaultValue = "0") int rec_num, @RequestParam(name = "offset", defaultValue = "30") int offset, @RequestBody (required=false) ConcertInput input) {
+    @GetMapping("")
+    public ResponseEntity<RequestOutput> getAllConcerts(@RequestParam(name = "rec_num", defaultValue = "0") int rec_num, @RequestParam(name = "offset", defaultValue = "30") int offset, @RequestBody (required=false) ConcertInput input) {
         ConcertRequestContext ctx = new ConcertRequestContext( input );
-        ctx.recOutParam.setRecNum(rec_num);
-        ctx.recOutParam.setOffset(offset);
+        ctx.reqParam.setRecNum(rec_num);
+        ctx.reqParam.setOffset(offset);
 
         List<ConcertOutput> concerts = concertService.getAllConcerts(ctx);
         ctx.output.setData(concerts);
 
+        ResponseEntity<RequestOutput> re =  null;
         try {
-            if( ctx.isOnError() ) {
-                throw new controllerException(ctx.output.getAppStatus().toHttpStatus());
-            }
+            re = new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
         } catch (Exception e) {
         }
-
-        return ctx.output;
+        return re;
     }
 
+    
     @GetMapping("/range")
-    public RequestOutput getConcertsByRange(@RequestParam(name = "rec_num", defaultValue = "0") int rec_num, @RequestParam(name = "offset", defaultValue = "30") int offset, @RequestBody (required=false) ConcertRangeInput input) {
+    public ResponseEntity<RequestOutput> getConcertsByRange(@RequestParam(name = "rec_num", defaultValue = "0") int rec_num, @RequestParam(name = "offset", defaultValue = "30") int offset, @RequestBody (required=false) ConcertRangeInput input) {
         ConcertRgRequestContext ctx = new ConcertRgRequestContext( input );
-        ctx.recOutParam.setRecNum(rec_num);
-        ctx.recOutParam.setOffset(offset);
+        ctx.reqParam.setRecNum(rec_num);
+        ctx.reqParam.setOffset(offset);
 
         List<ConcertOutput> concerts = concertService.getConcertsByRange(ctx);
         ctx.output.setData(concerts);
         
-
+        ResponseEntity<RequestOutput> re =  null;
         try {
-            if( ctx.isOnError() ) {
-                throw new controllerException(ctx.output.getAppStatus().toHttpStatus());
-            }
+            re = new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
         } catch (Exception e) {
         }
-
-        return ctx.output;
+        return re;
     }
 }
