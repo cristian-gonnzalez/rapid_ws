@@ -5,7 +5,6 @@ package com.meli.backend.rapid.ws.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,13 +17,6 @@ import com.meli.backend.rapid.req_ctx.ConcertRgRequestContext;
 @RequestMapping("/concert")
 public class ConcertController {
     
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Error")
-    public class controllerException extends RuntimeException {
-        public controllerException(HttpStatus status) {
-            // TODO: handle http codes
-        }
-    }
-
     private ConcertService concertService;
     
     public ConcertController(ConcertService concertService) {
