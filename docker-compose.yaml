@@ -1,0 +1,36 @@
+services:
+  mysqldb:
+    container_name: mysqldb
+    image: "mysql:8.0"
+    environment:
+      MYSQL_DATABASE: dbtest
+      MYSQL_USER: dbtest
+      MYSQL_PASSWORD: dbtest
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    ports:
+      - 3303:3306
+    networks:
+      - springapimysql-net
+
+  rapid_ws:
+    build: .
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysqldb
+    environment:
+      - spring.datasource.url=jdbc:mysql://mysqldb:3306/dbtest
+      - spring.datasource.username=dbtest
+      - spring.datasource.password=dbtest
+      - spring.jpa.hibernate.ddl-auto=update
+    networks:
+      - springapimysql-net
+    restart: on-failure
+    volumes:
+      - .m2:/root/.m2
+      
+networks:
+   springapimysql-net:
+    name: springapimysql-net

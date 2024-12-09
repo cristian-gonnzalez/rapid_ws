@@ -1,32 +1,41 @@
 package com.meli.backend.rapid.db;
 
+
 import java.sql.*;
 
+import com.meli.backend.rapid.common.AppProperties;
+
 public class DataBase {
-    
+
     private Connection conn = null;
     private Statement stmt = null;
     private ResultSet rs = null;
         
     public DataBase() {
+        
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } 
-        catch (ClassNotFoundException ex) {
+        catch (ClassNotFoundException e) {
+            System.err.println(e.getMessage());
         }
     }
 
     public Boolean connect() {
-
-        String user = "root";
-        String pswd = "root";
-        String url = "jdbc:mysql://localhost:3306/dbtest";
-    
+        
         try {
+            AppProperties appproperties = new AppProperties();
+            String url = appproperties.getProperty("spring.datasource.url");
+            String user = appproperties.getProperty("spring.datasource.username");
+            String pswd = appproperties.getProperty("spring.datasource.password");
+            
+            System.out.println("Connect to "+ url);
+            System.out.println("[user: "+ user + " pswd: " + pswd +"]");
+
             conn = DriverManager.getConnection(url, user, pswd);            
         }
-        catch (SQLException exception) {
-            System.out.println(exception);
+        catch (Exception e) {
+            System.out.println(e.getMessage());
             return false;
         }
         return true;
@@ -56,7 +65,6 @@ public class DataBase {
         conn.commit();
         conn.setAutoCommit(true);
     }
-
 
     public void prepareStmt() {
         try {

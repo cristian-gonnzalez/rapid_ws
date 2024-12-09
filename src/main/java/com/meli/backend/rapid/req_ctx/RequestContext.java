@@ -1,5 +1,7 @@
 package com.meli.backend.rapid.req_ctx;
 
+import java.util.ArrayList;
+
 import com.meli.backend.rapid.common.AppStatus.eRCode;
 import com.meli.backend.rapid.req_ctx.req_ctx_io.RequestOutput;
 
@@ -9,6 +11,7 @@ public class RequestContext {
 
     public RequestContext() {
         this.output = new RequestOutput();
+        this.output.setData(new ArrayList<>());
     }
 
     public Boolean isOnError() {

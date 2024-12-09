@@ -69,12 +69,14 @@ public class ConcertService {
         return concertRecordsToOutputs(concerts);
     }
 
-    public List<ConcertOutput> getAllConcerts(ConcertRequestContext ctx) {
+    public List<ConcertOutput> getAllConcerts(ConcertRequestContext ctx) throws Exception{
         List<ConcertRecord> concerts = null;
         try {
             concerts = concertRepository.getConcerts(ctx);    
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             System.err.println("Failing getting all converts");
+            throw e;
         }
 
         return concertRecordsToOutputs(concerts);

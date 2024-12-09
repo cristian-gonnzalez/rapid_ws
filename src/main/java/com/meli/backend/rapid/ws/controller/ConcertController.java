@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.meli.backend.rapid.ws.services.ConcertService;
+import com.meli.backend.rapid.common.AppStatus.eRCode;
 import com.meli.backend.rapid.req_ctx.ConcertRequestContext;
 import com.meli.backend.rapid.req_ctx.ConcertRgRequestContext;
 import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertInput;
@@ -35,9 +36,15 @@ public class ConcertController {
         ctx.reqParam.setRecNum(rec_num);
         ctx.reqParam.setOffset(offset);
 
-        List<ConcertOutput> concerts = concertService.getAllConcerts(ctx);
-        ctx.output.setData(concerts);
-
+        try {
+            List<ConcertOutput> concerts = concertService.getAllConcerts(ctx);
+            ctx.output.setData(concerts);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            if(!ctx.isOnError())
+                ctx.setError(eRCode.internalError, e.getMessage());
+        }
+        
         return new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
     }
 
