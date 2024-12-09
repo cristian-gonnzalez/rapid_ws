@@ -15,7 +15,7 @@ def simpleGetRequestResponse200Test():
     data = {
     }
     response = requests.get(url, data=json.dumps(data), headers=headers)
-    assert response.status_code == 200, response.status_code
+    assert response.status_code == 200, response.json()
     response = assert_reponse( response )
     
     assert isinstance(response['data'], list)

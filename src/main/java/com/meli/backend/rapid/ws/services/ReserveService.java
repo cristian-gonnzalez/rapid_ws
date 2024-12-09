@@ -3,7 +3,9 @@ package com.meli.backend.rapid.ws.services;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -50,7 +52,7 @@ public class ReserveService {
         }
 
         if( concerts == null || concerts.size() == 0) {
-            ctx.setError(eRCode.valueNotFound, "Concert not found");
+            ctx.setError(eRCode.notFound, "Concert not found");
             return null;
         }
         
@@ -73,7 +75,7 @@ public class ReserveService {
         }
 
         if( !found ) {
-            ctx.setError(eRCode.valueNotFound, "Sector not found");
+            ctx.setError(eRCode.notFound, "Sector not found");
             return null;
         }
 
@@ -136,16 +138,14 @@ public class ReserveService {
     }
 
 
-    /** Make the reserve of the concert
-     * 
-     * @param ctx Reserce request context.
-     */
-    public void reserveConcert( ReserveRequestContext ctx) {
+    public void createReserve( ReserveRequestContext ctx) {
 
         ReserveOutput reserve = (ReserveOutput)ctx.output.getData();
         
+        // syncronized this section in order to lock write access in db
         synchronized(CMutext.getInstance()) {
 
+            // gets the sector
             ConcertRecord c = getSector(ctx, ctx.input.getArtist(), 
                                              ctx.input.getPlace(), 
                                              ctx.input.getConcertDate(), 
@@ -153,83 +153,108 @@ public class ReserveService {
             if(ctx.isOnError())
                 return;
 
+            // the method returns a list but we know that there is one record
             List<SectorRecord> sectors = c.getSectors();
             SectorRecord s = sectors.get(0);
 
+            // checks if the sector has seats
             com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput.Total total = reserve.getTotalInfo();            
             double total_amount = 0;
             if( s.getHasSeat() ) {
+
                 if( ctx.input.getQuantity() != null) {
-                    ctx.setError(eRCode.invalidFields, "seats field is required");
+                    ctx.setError(eRCode.invalidField, "seats field is required");
                     return;
                 }
                 
                 List<Integer> reservedseats = s.getSeats();
                 List<Integer> seats = ctx.input.getSeats();
 
+                // checks if there is space in the sector
                 int newOcupiedSpace =  s.getOccupiedSpace() + seats.size();
                 if( newOcupiedSpace > s.getRoomSpace() ) {
                     ctx.setError(eRCode.noRoomAvailable, "No room is availble");
                     return;
                 }
 
+                // checks for repeated seats in the input
+                Set<Integer> myset = new HashSet<Integer>(seats); 
+                if(myset.size() != seats.size()) {
+                    ctx.setError(eRCode.invalidFieldContent, "Repeated setas");
+                    return;
+                }
+
+                // checks for reserved seats
+                Set<Integer> intersection = new HashSet<Integer>(reservedseats);
+                intersection.retainAll(myset);
+                if( intersection.size() != 0) {
+                    ctx.setError(eRCode.alreadyRserved, "Seat number is ocuppied");
+                    return;
+                }
+                
+                // checks for boundaries
                 for(int i=0; i<reservedseats.size(); i++) {
                     for(int j=0; j<seats.size(); j++) {            
-                        
                         if( seats.get(j) <= 0 || seats.get(j) > seats.size() ) {
-                            ctx.setError(eRCode.invalidFields, "Seat number out of bounds");
+                            ctx.setError(eRCode.invalidFieldContent, "Seat number out of bounds");
                             return;   
-                        }
-                        
-                        if( reservedseats.get(i).equals(seats.get(j)) ) {
-                            ctx.setError(eRCode.seatReserved, "Seat number is ocuppied");
-                            return;
                         }
                     }    
                 }
 
+                // calculates the total amount
                 total_amount = s.getPrice() * seats.size();
 
+                // saves the queantity in ouput
                 total.setQuantity(seats.size());
                 
+                // updates the sector
                 s.setSeats(seats);
                 s.setOccupiedSpace(newOcupiedSpace);
             }
             else {
 
                 if( ctx.input.getSeats() != null) {
-                    ctx.setError(eRCode.invalidFields, "qty field is required");
+                    ctx.setError(eRCode.missingField, "qty field is required");
                     return;
                 }
 
+                // checks for space
                 int newOcupiedSpace = s.getOccupiedSpace() + ctx.input.getQuantity() ;
                 if( s.getOccupiedSpace() + ctx.input.getQuantity() > s.getRoomSpace() ) {
                     ctx.setError(eRCode.noRoomAvailable, "No room is availble");
                     return;
                 }
 
-                total.setQuantity(ctx.input.getQuantity());
+                // calculates the total amount
                 total_amount = s.getPrice() * ctx.input.getQuantity();
 
+                // saves the quantity in the output
+                total.setQuantity(ctx.input.getQuantity());
+                // updates the sector
                 s.setOccupiedSpace(newOcupiedSpace);
             }
 
+            // saves fields the output
             total.setPrice(s.getPrice());
             total.setTotal(total_amount);
 
             if( ctx.isOnError() ) {
                 return;
             }
-            
+            // if we reach here, it means we can create the reserve
+            // builds the reserve information for the output 
             buildTicketReserve(reserve, ctx, s);
             
             try {
                 Boolean r = reserveRepository.saveReserve( ctx, reserve, s );
                 if( !r ) {
-                    ctx.setError(eRCode.failToApllyEffect, "Error when saving reserve");
+                    ctx.setError(eRCode.internalError, "Error when saving reserve");
                 }    
             } catch (Exception e) {
-                // TODO: handle exception
+                System.out.println("Failed to saving reserve");
+                if(!ctx.isOnError())
+                    ctx.setError(eRCode.internalError, "Error when creating reserve");
             }
         }
     }
@@ -239,7 +264,7 @@ public class ReserveService {
 
         ReserveRecord rec = reserveRepository.getReserve( ctx );
         if(rec == null ){
-            ctx.setError(eRCode.valueNotFound, "Reserve not found");
+            ctx.setError(eRCode.notFound, "Reserve not found");
             return;
         }
         synchronized(CMutext.getInstance()) {
@@ -251,7 +276,9 @@ public class ReserveService {
                 
                 reserveRepository.deleteReserve( rec );           
             } catch (Exception e) {
-                // TODO: handle exception
+                System.out.println("Failed to delete reserve");
+                if(!ctx.isOnError())
+                    ctx.setError(eRCode.internalError, "Error when deleting reserve");
             }
         }
        

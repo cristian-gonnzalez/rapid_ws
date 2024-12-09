@@ -12,13 +12,12 @@ public class AppStatus {
     public enum eRCode {
         success,
         missingField,
-        invalidFields,
-        lessOrTooMuchFields,
-        valueNotFound,
+        invalidField,
+        invalidFieldContent,
+        notFound,
         noRoomAvailable,
-        seatReserved,
-        failToApllyEffect,
-        unknownError
+        alreadyRserved,
+        internalError
     };
     
     @JsonIgnore
@@ -29,7 +28,7 @@ public class AppStatus {
     private String app_msg;
 
     public AppStatus() {
-        codoToHttpStatus = new HashMap<>();
+        this.codoToHttpStatus = new HashMap<>();
         loadHttpSatatusMap();
 
         this.app_rc = eRCode.success;
@@ -37,20 +36,19 @@ public class AppStatus {
     }
 
     private void loadHttpSatatusMap() {
-        codoToHttpStatus.put(eRCode.success, HttpStatus.OK);
-        codoToHttpStatus.put(eRCode.missingField, HttpStatus.NOT_FOUND);
-        codoToHttpStatus.put(eRCode.invalidFields, HttpStatus.BAD_REQUEST);
-        codoToHttpStatus.put(eRCode.lessOrTooMuchFields, HttpStatus.BAD_REQUEST);
-        codoToHttpStatus.put(eRCode.valueNotFound, HttpStatus.BAD_REQUEST);
-        codoToHttpStatus.put(eRCode.noRoomAvailable, HttpStatus.BAD_REQUEST);
-        codoToHttpStatus.put(eRCode.seatReserved, HttpStatus.BAD_REQUEST);
-        codoToHttpStatus.put(eRCode.failToApllyEffect, HttpStatus.BAD_REQUEST);
-        codoToHttpStatus.put(eRCode.unknownError, HttpStatus.BAD_REQUEST);
+        this.codoToHttpStatus.put(eRCode.success, HttpStatus.OK);
+        this.codoToHttpStatus.put(eRCode.missingField, HttpStatus.NOT_FOUND);
+        this.codoToHttpStatus.put(eRCode.invalidField, HttpStatus.BAD_REQUEST);
+        this.codoToHttpStatus.put(eRCode.invalidFieldContent, HttpStatus.BAD_REQUEST);
+        this.codoToHttpStatus.put(eRCode.notFound, HttpStatus.NOT_FOUND);
+        this.codoToHttpStatus.put(eRCode.noRoomAvailable, HttpStatus.BAD_REQUEST);
+        this.codoToHttpStatus.put(eRCode.alreadyRserved, HttpStatus.BAD_REQUEST);
+        this.codoToHttpStatus.put(eRCode.internalError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @JsonIgnore
     public HttpStatus toHttpStatus() {
-        return codoToHttpStatus.get(app_rc);
+        return this.codoToHttpStatus.get(app_rc);
     }
 
     public void setCode(eRCode app_rc) {

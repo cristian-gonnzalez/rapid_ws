@@ -8,10 +8,13 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.meli.backend.rapid.req_ctx.req_ctx_io.*;
 import com.meli.backend.rapid.ws.services.ConcertService;
 import com.meli.backend.rapid.req_ctx.ConcertRequestContext;
 import com.meli.backend.rapid.req_ctx.ConcertRgRequestContext;
+import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertInput;
+import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertOutput;
+import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertRangeInput;
+import com.meli.backend.rapid.req_ctx.req_ctx_io.RequestOutput;
 
 @RestController
 @RequestMapping("/concert")
@@ -24,7 +27,10 @@ public class ConcertController {
     }
 
     @GetMapping("")
-    public ResponseEntity<RequestOutput> getAllConcerts(@RequestParam(name = "rec_num", defaultValue = "0") int rec_num, @RequestParam(name = "offset", defaultValue = "30") int offset, @RequestBody (required=false) ConcertInput input) {
+    public ResponseEntity<RequestOutput> getAllConcerts(
+                @RequestParam(name = "rec_num", defaultValue = "0") int rec_num, 
+                @RequestParam(name = "offset", defaultValue = "30") int offset, 
+                @RequestBody (required=false) ConcertInput input) {
         ConcertRequestContext ctx = new ConcertRequestContext( input );
         ctx.reqParam.setRecNum(rec_num);
         ctx.reqParam.setOffset(offset);
@@ -37,7 +43,10 @@ public class ConcertController {
 
     
     @GetMapping("/range")
-    public ResponseEntity<RequestOutput> getConcertsByRange(@RequestParam(name = "rec_num", defaultValue = "0") int rec_num, @RequestParam(name = "offset", defaultValue = "30") int offset, @RequestBody (required=false) ConcertRangeInput input) {
+    public ResponseEntity<RequestOutput> getConcertsByRange(
+                @RequestParam(name = "rec_num", defaultValue = "0") int rec_num, 
+                @RequestParam(name = "offset", defaultValue = "30") int offset, 
+                @RequestBody (required=false) ConcertRangeInput input) {
         // prepares the context 
         ConcertRgRequestContext ctx = new ConcertRgRequestContext( input );
         ctx.reqParam.setRecNum(rec_num);

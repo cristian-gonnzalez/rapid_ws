@@ -1,9 +1,9 @@
 /**
  *  Request paramaters that specifies the number of records to give in the ouput 
  **/
-package com.meli.backend.rapid.common;
+package com.meli.backend.rapid.req_ctx;
 
-public class RequestParam {
+public class RequestContextParam {
 
     /** Record number to start giving in the response. */
     private int rec_num;
@@ -14,7 +14,7 @@ public class RequestParam {
     /** Initializes.
      * 
      */
-    public RequestParam() {
+    public RequestContextParam() {
         this.rec_num = 0;
         this.offset = 100;
     }

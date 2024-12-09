@@ -20,7 +20,6 @@ public class ConcertService {
         concertRepository = new ConcertRepository();
     }
 
-
     public SectorOutput sectorRecordToOutput( SectorRecord record ) {
         SectorOutput output = new SectorOutput();
         output.setName(record.getName());
@@ -39,7 +38,6 @@ public class ConcertService {
         }
         return outputs;
     }
-
 
     public ConcertOutput concertRecordToOutput( ConcertRecord record ) {
         ConcertOutput output = new ConcertOutput();
@@ -60,36 +58,25 @@ public class ConcertService {
         return outputs;
     }
     
-    /** Gets the list of concerts by range.
-     * 
-     * @param ctx Context.
-     * @return the list of concerts.
-     */
     public List<ConcertOutput> getConcertsByRange(ConcertRgRequestContext ctx) {
         List<ConcertRecord> concerts = null;
         try {
             concerts = concertRepository.getConcertsByRange(ctx);
         } catch (Exception e) {
-            // TODO: handle exception
+            System.err.println("Failing getting converts by range");
         }
 
         return concertRecordsToOutputs(concerts);
     }
 
-    /** Gets all concerts or a reduce group if fields input is sent. 
-     * 
-     * @param ctx Context
-     * @return The list of concerts.
-     */
     public List<ConcertOutput> getAllConcerts(ConcertRequestContext ctx) {
         List<ConcertRecord> concerts = null;
         try {
             concerts = concertRepository.getConcerts(ctx);    
         } catch (Exception e) {
-            // TODO: handle exception
+            System.err.println("Failing getting all converts");
         }
 
         return concertRecordsToOutputs(concerts);
     }
-
 }

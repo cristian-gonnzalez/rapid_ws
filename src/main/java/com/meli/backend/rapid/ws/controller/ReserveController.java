@@ -34,11 +34,11 @@ public class ReserveController {
 
         if( (input.getQuantity() == null && input.getSeats() == null) || 
             (input.getQuantity() != null && input.getSeats() != null)) {
-            ctx.setError(eRCode.lessOrTooMuchFields, "One field is required: 'qty' or 'seats'");
+            ctx.setError(eRCode.missingField, "One field is required: 'qty' or 'seats'");
             return false;
         }
         if( input.getName() == null || input.getDNI() == null || input.getSurname() == null ) {
-            ctx.setError(eRCode.lessOrTooMuchFields, "User name, surname and dni is required to reserve");
+            ctx.setError(eRCode.missingField, "User name, surname and dni is required to reserve");
             return false;
         }
 
@@ -47,12 +47,11 @@ public class ReserveController {
 
     
     @PostMapping("/reserve")
-    public ResponseEntity<RequestOutput> getReserves(@RequestBody (required = true) ReserveInput input) { 
+    public ResponseEntity<RequestOutput> createReserve(@RequestBody (required = true) ReserveInput input) { 
         ReserveRequestContext ctx = new ReserveRequestContext(input );
         
-        
         if( validateInput( ctx, ctx.input) ) {
-            this.reserveService.reserveConcert(ctx);            
+            this.reserveService.createReserve(ctx);            
         }
             
         if(ctx.isOnError())
@@ -76,7 +75,7 @@ public class ReserveController {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             if( !ctx.isOnError() ) {
-                ctx.setError(eRCode.unknownError, "Unknow error");
+                ctx.setError(eRCode.internalError, "Unknow error");
                 ctx.output.setData(new ArrayList<>());
             }   
         }
@@ -87,13 +86,13 @@ public class ReserveController {
 
 
     @DeleteMapping("/reserve")
-    public ResponseEntity<RequestOutput> deleteReserveConcert(@RequestBody (required = true) DelReserveInput input) {
+    public ResponseEntity<RequestOutput> deleteReserve(@RequestBody (required = true) DelReserveInput input) {
         
         DelReserveRequestContext ctx = new DelReserveRequestContext(input );
         
         if( ctx.input.getReserveId() == null || ctx.input.getArtist() == null || 
             ctx.input.getPlace() == null || ctx.input.getConcertDate() == null || ctx.input.getSector() == null ) {
-            ctx.setError(eRCode.lessOrTooMuchFields, "All fields are mandatory");
+            ctx.setError(eRCode.missingField, "All fields are mandatory");
         }
         ctx.output.setData(new ArrayList<>());
 
@@ -107,7 +106,7 @@ public class ReserveController {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             if( !ctx.isOnError() ) {
-                ctx.setError(eRCode.unknownError, "Unknow error");
+                ctx.setError(eRCode.internalError, "Unknow error");
                 ctx.output.setData(new ArrayList<>());
             }   
         }

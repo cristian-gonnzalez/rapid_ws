@@ -5,7 +5,6 @@ import com.meli.backend.rapid.req_ctx.req_ctx_io.RequestOutput;
 
 public class RequestContext {
 
-    /** Ourput */
     public RequestOutput output;
 
     public RequestContext() {
