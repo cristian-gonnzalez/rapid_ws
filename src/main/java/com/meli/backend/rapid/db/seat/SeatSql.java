@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import com.meli.backend.rapid.db.DataBase;
 import com.meli.backend.rapid.db.Sql;
-import com.meli.backend.rapid.db.sector.SectorSqlRecReader;
 
 public class SeatSql {
 

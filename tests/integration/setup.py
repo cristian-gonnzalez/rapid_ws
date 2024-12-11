@@ -17,8 +17,7 @@ reserve_url = api_url + '/concert/reserve'
 ARTISTS = ['Artist%d' % i for i in range(5)]
 PLACES = ['Place%d' % i for i in range(5)]
 CONCERTS = [ 
-    {
-        
+    { 
         'artist': 'Artist1',
         'concertDate': '2024-03-11',
         'time': '09:00:00',
@@ -30,8 +29,7 @@ CONCERTS = [
             { 'name': 'CAMPO', 'roomSpace': 10, 'occupiedSpace': 0, 'hasSeat': False, 'price': 100 }
         ]
     },
-    {
-        
+    {   
         'artist': 'Artist1',
         'concertDate': '2024-03-12',
         'time': '09:00:00',
@@ -41,8 +39,7 @@ CONCERTS = [
             { 'name': 'CAMPO', 'roomSpace': 10, 'occupiedSpace': 0, 'hasSeat': False, 'price': 100 }
         ]
     },
-    {
-        
+    {   
         'artist': 'Artist2',
         'concertDate': '2024-03-18',
         'time': '09:00:00',
@@ -51,8 +48,7 @@ CONCERTS = [
             { 'name': 'CAMPO', 'roomSpace': 10, 'occupiedSpace': 0, 'hasSeat': False, 'price': 100 }
         ]
     },
-    {
-        
+    {   
         'artist': 'Artist3',
         'concertDate': '2024-05-01',
         'time': '09:00:00',
@@ -63,8 +59,7 @@ CONCERTS = [
             { 'name': 'SECTOR2', 'roomSpace': 10, 'occupiedSpace': 0, 'hasSeat': True, 'price': 500 }
         ]
     },
-    {
-        
+    {   
         'artist': 'Artist3',
         'concertDate': '2024-05-02',
         'time': '09:00:00',
@@ -90,7 +85,6 @@ def deleteAll():
         }
         send_delete( reserve_url, payload )
     
-
     response = send_get(concert_url )
     for d in response['data']:
         data = {
@@ -154,7 +148,6 @@ def init():
     createSectors()
 
 
-
 def initWithNoSectors():
     deleteAll()
     
@@ -164,5 +157,4 @@ def initWithNoSectors():
     createConcertWNoSectors()    
 
 if __name__ == '__main__': 
-    
     init()

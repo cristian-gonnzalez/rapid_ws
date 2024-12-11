@@ -3,6 +3,16 @@ import requests
 import json
 
 
+class Logger:
+
+    def __init__(self, debug ):
+        self.debug = debug
+
+    def log( self, msg ):
+        if self.debug:
+            print( msg )
+
+
 def send_request(method, url, payload, check_http_status_ok = True):
     headers = {"Content-Type":"application/json"}
     s = method + " " + url + " " + str(payload) 
