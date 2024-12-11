@@ -10,8 +10,8 @@ import com.meli.backend.rapid.db.artist.ArtistDelStmt;
 import com.meli.backend.rapid.db.artist.ArtistInsertStmt;
 import com.meli.backend.rapid.db.artist.ArtistSelSql;
 import com.meli.backend.rapid.db.artist.ArtistSelStmt;
-import com.meli.backend.rapid.req_ctx.ArtistRequestContext;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.ArtistOutput;
+import com.meli.backend.rapid.req_ctx.artist.ArtistOutput;
+import com.meli.backend.rapid.req_ctx.artist.ArtistRequestContext;
 import com.meli.backend.rapid.ws.models.ArtistRecord;
 
 public class ArtistRepository {

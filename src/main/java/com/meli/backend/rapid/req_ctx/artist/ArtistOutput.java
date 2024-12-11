@@ -1,11 +1,10 @@
-package com.meli.backend.rapid.req_ctx.req_ctx_io;
+package com.meli.backend.rapid.req_ctx.artist;
 
-
-public class ArtistInput {
+public class ArtistOutput {
 
     String name;
 
-    public ArtistInput() {
+    public ArtistOutput() {
     }
 
     public String getName() {
@@ -15,4 +14,5 @@ public class ArtistInput {
     public void setName(String name) {
         this.name = name;
     }
+
 }

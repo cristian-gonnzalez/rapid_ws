@@ -1,10 +1,10 @@
-package com.meli.backend.rapid.req_ctx.req_ctx_io;
+package com.meli.backend.rapid.req_ctx.place;
 
-public class ArtistOutput {
+public class PlaceOutput {
 
-    String name;
+    private String name;
 
-    public ArtistOutput() {
+    public PlaceOutput() {
     }
 
     public String getName() {

@@ -6,15 +6,14 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.meli.backend.rapid.common.CMutext;
-import com.meli.backend.rapid.req_ctx.ArtistRequestContext;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.ArtistOutput;
+import com.meli.backend.rapid.req_ctx.artist.ArtistOutput;
+import com.meli.backend.rapid.req_ctx.artist.ArtistRequestContext;
 import com.meli.backend.rapid.ws.repositories.ArtistRepository;
 
 @Service
 public class ArtistService {
 
     ArtistRepository artistRepository;
-
 
     public ArtistService() {
         this.artistRepository = new ArtistRepository();

@@ -1,6 +1,5 @@
 package com.meli.backend.rapid.ws.controller;
 
-
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -12,33 +11,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.meli.backend.rapid.common.AppStatus.eRCode;
-import com.meli.backend.rapid.req_ctx.artist.ArtistInput;
-import com.meli.backend.rapid.req_ctx.artist.ArtistOutput;
-import com.meli.backend.rapid.req_ctx.artist.ArtistRequestContext;
+import com.meli.backend.rapid.req_ctx.place.PlaceInput;
+import com.meli.backend.rapid.req_ctx.place.PlaceOutput;
+import com.meli.backend.rapid.req_ctx.place.PlaceRequestContext;
 import com.meli.backend.rapid.req_ctx.req_ctx_io.RequestOutput;
-import com.meli.backend.rapid.ws.services.ArtistService;
+import com.meli.backend.rapid.ws.services.PlaceService;
+
 
 @RestController
-@RequestMapping("/artist")
-public class ArtistController {
+@RequestMapping("/place")
+public class PlaceController {
 
-    ArtistService artistService;
-    public ArtistController() {
-        this.artistService = new ArtistService();
+    private PlaceService service;
+
+    public PlaceController() {
+        this.service = new PlaceService();
     }
 
-
     @PostMapping("")
-    public ResponseEntity<RequestOutput> createArtist(
-                @RequestBody (required=false) ArtistInput input) {
+    public ResponseEntity<RequestOutput> createPlace(
+                @RequestBody (required=false) PlaceInput input) {
         
-        ArtistRequestContext ctx = new ArtistRequestContext( input );
+        PlaceRequestContext ctx = new PlaceRequestContext( input );
         if( input.getName() == null ) {
             ctx.setError(eRCode.missingField, "name is mandatory");
         }
        
         try {
-            artistService.createArtist( ctx );
+            service.createPlace( ctx );
         } catch (Exception e) {
             System.err.println(e.getMessage());
             if(!ctx.isOnError())
@@ -47,19 +47,18 @@ public class ArtistController {
         
         return new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
     }
-
    
     @DeleteMapping("")
-    public ResponseEntity<RequestOutput> deleteArtist(
-                @RequestBody (required=false) ArtistInput input) {
-        ArtistRequestContext ctx = new ArtistRequestContext( input );
+    public ResponseEntity<RequestOutput> deletePlace(
+                @RequestBody (required=false) PlaceInput input) {
+        PlaceRequestContext ctx = new PlaceRequestContext( input );
        
         if( input.getName() == null ) {
             ctx.setError(eRCode.missingField, "name is mandatory");
         }
         else {
             try {
-                artistService.deleteArtist( ctx );
+                service.deletePlace( ctx );
             } catch (Exception e) {
                 System.err.println(e.getMessage());
                 if(!ctx.isOnError())
@@ -70,16 +69,14 @@ public class ArtistController {
         return new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
     }
 
-    
-   
     @GetMapping("")
-    public ResponseEntity<RequestOutput> getArtist(
-                @RequestBody (required=false) ArtistInput input) {
+    public ResponseEntity<RequestOutput> getPlace(
+                @RequestBody (required=false) PlaceInput input) {
         
-        ArtistRequestContext ctx = new ArtistRequestContext( input );
+        PlaceRequestContext ctx = new PlaceRequestContext( input );
        
         try {
-            List<ArtistOutput> records = artistService.getArtists( ctx );
+            List<PlaceOutput> records = service.getPlaces( ctx );
             ctx.output.setData(records);
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -89,4 +86,5 @@ public class ArtistController {
         
         return new ResponseEntity<RequestOutput>(ctx.output, ctx.output.getAppStatus().toHttpStatus());
     }
-}
+   
+ }
