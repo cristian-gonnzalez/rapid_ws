@@ -1,9 +1,9 @@
 /** 
  * This files containts the context for process the request url /concert/reserve
  */
-package com.meli.backend.rapid.req_ctx;
+package com.meli.backend.rapid.req_ctx.reserve;
 
-import com.meli.backend.rapid.req_ctx.req_ctx_io.*;
+import com.meli.backend.rapid.req_ctx.RequestContext;
 
 /** Reserve request context */
 public class ReserveRequestContext extends RequestContext {

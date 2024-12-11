@@ -11,14 +11,14 @@ import org.springframework.stereotype.Service;
 
 import com.meli.backend.rapid.common.CMutext;
 import com.meli.backend.rapid.common.AppStatus.eRCode;
-import com.meli.backend.rapid.req_ctx.ConcertRequestContext;
-import com.meli.backend.rapid.req_ctx.DelReserveRequestContext;
-import com.meli.backend.rapid.req_ctx.GetReserveRequestContext;
-import com.meli.backend.rapid.req_ctx.ReserveRequestContext;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertInput;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput.ConcertInfo;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput.Total;
+import com.meli.backend.rapid.req_ctx.concert.ConcertInput;
+import com.meli.backend.rapid.req_ctx.concert.ConcertRequestContext;
+import com.meli.backend.rapid.req_ctx.reserve.ReserveGetRequestContext;
+import com.meli.backend.rapid.req_ctx.reserve.ReserveDelRequestContext;
+import com.meli.backend.rapid.req_ctx.reserve.ReserveOutput;
+import com.meli.backend.rapid.req_ctx.reserve.ReserveRequestContext;
+import com.meli.backend.rapid.req_ctx.reserve.ReserveOutput.ConcertInfo;
+import com.meli.backend.rapid.req_ctx.reserve.ReserveOutput.Total;
 import com.meli.backend.rapid.ws.models.SectorRecord;
 import com.meli.backend.rapid.ws.models.User;
 import com.meli.backend.rapid.ws.models.ConcertRecord;
@@ -84,7 +84,7 @@ public class ReserveService {
 
     private void buildTicketReserve( ReserveOutput reserve, ReserveRequestContext ctx, SectorRecord s ) {
 
-        com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput.ConcertInfo concertinfo = reserve.getConcertInfo();
+        com.meli.backend.rapid.req_ctx.reserve.ReserveOutput.ConcertInfo concertinfo = reserve.getConcertInfo();
         concertinfo.setArtist( ctx.input.getArtist() );
         concertinfo.setPlace( ctx.input.getPlace() );
         concertinfo.setConcertDate(ctx.input.getConcertDate() );
@@ -132,7 +132,7 @@ public class ReserveService {
     }
 
 
-    public List<ReserveOutput> getReserves(GetReserveRequestContext ctx ) throws SQLException {
+    public List<ReserveOutput> getReserves(ReserveGetRequestContext ctx ) throws SQLException {
         List<ReserveRecord> reserveRecords = reserveRepository.getReserves(ctx);
         return reserveRecordsToOutputs( reserveRecords );
     }
@@ -158,7 +158,7 @@ public class ReserveService {
             SectorRecord s = sectors.get(0);
 
             // checks if the sector has seats
-            com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput.Total total = reserve.getTotalInfo();            
+            com.meli.backend.rapid.req_ctx.reserve.ReserveOutput.Total total = reserve.getTotalInfo();            
             double total_amount = 0;
             if( s.getHasSeat() ) {
 
@@ -260,7 +260,7 @@ public class ReserveService {
     }
 
     
-    public void deleteReserve( DelReserveRequestContext ctx ) throws SQLException {
+    public void deleteReserve( ReserveDelRequestContext ctx ) throws SQLException {
 
         ReserveRecord rec = reserveRepository.getReserve( ctx );
         if(rec == null ){

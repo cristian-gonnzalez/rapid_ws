@@ -3,10 +3,11 @@ package com.meli.backend.rapid.ws.repositories;
 import java.sql.*;
 import java.util.*;
 
-import com.meli.backend.rapid.db.ConcertSql;
-import com.meli.backend.rapid.db.ConcertStmt;
 import com.meli.backend.rapid.db.DataBase;
-import com.meli.backend.rapid.req_ctx.*;
+import com.meli.backend.rapid.db.concert.ConcertSql;
+import com.meli.backend.rapid.db.concert.ConcertStmt;
+import com.meli.backend.rapid.req_ctx.concert.ConcertRequestContext;
+import com.meli.backend.rapid.req_ctx.concert.ConcertRgRequestContext;
 import com.meli.backend.rapid.ws.models.ConcertRecord;
 
 public class ConcertRepository {

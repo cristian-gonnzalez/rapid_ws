@@ -1,58 +1,64 @@
-package com.meli.backend.rapid.req_ctx.req_ctx_io;
+package com.meli.backend.rapid.req_ctx.reserve;
 
 import java.sql.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class DelReserveInput {
-     
-    /** The artist name. */
-    @JsonProperty(required = true)
-    private Integer reserveId;
+public class ReserveGetInput {
 
-    /** The artist name. */
-    @JsonProperty(required = true)
+    private int reserveId;
+
     private String artist;
 
-    /** The place name. */
-    @JsonProperty(required = true)
     private String place;
     
     /** The concert date. */
     @JsonFormat(timezone = "GMT-03:00")
-    @JsonProperty(required = true)
     private Date concertDate;
 
-    /** The sector name. */
-    @JsonProperty(required = true)
     private String sector;
-
-    /** List of seats to reserve. 
-     * If you use this field, do not sent the qty field. */
-    private List<Integer> seats;
-
     
-    public DelReserveInput() {
+    private String name;
+
+    private String surname;
+
+    private long dni;
+
+    public ReserveGetInput() {
     }
-    
-    public void setReserveId( Integer  reserveId ) {
+
+    public void setReserveId( int reserveId ) {
         this.reserveId = reserveId;
     }
 
-    public Integer  getReserveId() {
+    public int getReserveId() {
         return this.reserveId;
     }
     
-    public void setSeats( List<Integer>  seats ) {
-        this.seats = seats;
+    public void setDNI( Long dni ) {
+        this.dni = dni;
     }
 
-    public List<Integer>  getSeats() {
-        return this.seats;
+    public Long getDNI() {
+        return this.dni;
     }
 
+    public void setSurname( String surname ) {
+        this.surname = surname;
+    }
+
+    public String getSurname() {
+        return this.surname;
+    }
+
+    public void setName( String name ) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+    
     public void setSector( String sector ) {
         this.sector = sector;
     }
@@ -84,5 +90,4 @@ public class DelReserveInput {
     public Date getConcertDate( ) {
         return this.concertDate;
     }
-
 }

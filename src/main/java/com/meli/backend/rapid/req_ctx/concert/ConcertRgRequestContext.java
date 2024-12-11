@@ -1,9 +1,10 @@
 /** 
  * This files containts the context for process the request url /concert/range
  */
-package com.meli.backend.rapid.req_ctx;
+package com.meli.backend.rapid.req_ctx.concert;
 
-import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertRangeInput;
+import com.meli.backend.rapid.req_ctx.RequestContext;
+import com.meli.backend.rapid.req_ctx.RequestContextParam;
 
 /** Concert range request context.
  *  

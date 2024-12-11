@@ -1,4 +1,4 @@
-package com.meli.backend.rapid.req_ctx.req_ctx_io;
+package com.meli.backend.rapid.req_ctx.concert;
 
 import java.sql.Time;
 import java.util.*;

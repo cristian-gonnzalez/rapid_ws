@@ -10,8 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.meli.backend.rapid.common.AppStatus.eRCode;
-import com.meli.backend.rapid.req_ctx.*;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.*;
+import com.meli.backend.rapid.req_ctx.reserve.*;
 import com.meli.backend.rapid.ws.services.*;
 
 @RestController
@@ -64,8 +63,8 @@ public class ReserveController {
     @GetMapping("/reserve")
     public ResponseEntity<RequestOutput> getReserves(@RequestParam(name = "rec_num", defaultValue = "0") int rec_num, 
                                                      @RequestParam(name = "offset", defaultValue = "30") int offset, 
-                                                     @RequestBody (required=false) GetReserveInput input) {
-        GetReserveRequestContext ctx = new GetReserveRequestContext( input );
+                                                     @RequestBody (required=false) ReserveGetInput input) {
+                                                        ReserveGetRequestContext ctx = new ReserveGetRequestContext( input );
         ctx.reqParam.setRecNum(rec_num);
         ctx.reqParam.setOffset(offset);
 
@@ -86,9 +85,9 @@ public class ReserveController {
 
 
     @DeleteMapping("/reserve")
-    public ResponseEntity<RequestOutput> deleteReserve(@RequestBody (required = true) DelReserveInput input) {
+    public ResponseEntity<RequestOutput> deleteReserve(@RequestBody (required = true) ReserveDelInput input) {
         
-        DelReserveRequestContext ctx = new DelReserveRequestContext(input );
+        ReserveDelRequestContext ctx = new ReserveDelRequestContext(input );
         
         if( ctx.input.getReserveId() == null || ctx.input.getArtist() == null || 
             ctx.input.getPlace() == null || ctx.input.getConcertDate() == null || ctx.input.getSector() == null ) {

@@ -4,13 +4,13 @@ import java.sql.*;
 import java.util.List;
 
 import com.meli.backend.rapid.db.DataBase;
-import com.meli.backend.rapid.db.ReserveSql;
-import com.meli.backend.rapid.db.ReserveStmt;
-import com.meli.backend.rapid.req_ctx.DelReserveRequestContext;
-import com.meli.backend.rapid.req_ctx.GetReserveRequestContext;
-import com.meli.backend.rapid.req_ctx.ReserveRequestContext;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.ReserveOutput;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.SectorOutput;
+import com.meli.backend.rapid.db.reserve.ReserveSql;
+import com.meli.backend.rapid.db.reserve.ReserveStmt;
+import com.meli.backend.rapid.req_ctx.concert.SectorOutput;
+import com.meli.backend.rapid.req_ctx.reserve.ReserveDelRequestContext;
+import com.meli.backend.rapid.req_ctx.reserve.ReserveGetRequestContext;
+import com.meli.backend.rapid.req_ctx.reserve.ReserveOutput;
+import com.meli.backend.rapid.req_ctx.reserve.ReserveRequestContext;
 import com.meli.backend.rapid.ws.models.SectorRecord;
 import com.meli.backend.rapid.ws.models.ReserveRecord;
 
@@ -197,7 +197,7 @@ public class ReserveRepository {
     }
 
 
-    public List<ReserveRecord> getReserves(GetReserveRequestContext ctx) throws SQLException{
+    public List<ReserveRecord> getReserves(ReserveGetRequestContext ctx) throws SQLException{
 
         // creates an statement
         ReserveStmt stmt = new ReserveStmt();
@@ -228,7 +228,7 @@ public class ReserveRepository {
     } 
 
 
-    public ReserveRecord getReserve(DelReserveRequestContext ctx) throws SQLException{
+    public ReserveRecord getReserve(ReserveDelRequestContext ctx) throws SQLException{
 
         // creates an statement
         ReserveStmt stmt = new ReserveStmt();

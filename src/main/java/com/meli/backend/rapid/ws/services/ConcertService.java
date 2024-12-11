@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.meli.backend.rapid.req_ctx.*;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.*;
+import com.meli.backend.rapid.req_ctx.concert.ConcertOutput;
+import com.meli.backend.rapid.req_ctx.concert.ConcertRequestContext;
+import com.meli.backend.rapid.req_ctx.concert.ConcertRgRequestContext;
+import com.meli.backend.rapid.req_ctx.concert.SectorOutput;
 import com.meli.backend.rapid.ws.models.ConcertRecord;
 import com.meli.backend.rapid.ws.models.SectorRecord;
 import com.meli.backend.rapid.ws.repositories.*;

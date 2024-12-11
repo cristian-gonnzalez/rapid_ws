@@ -1,9 +1,13 @@
-package com.meli.backend.rapid.db;
+package com.meli.backend.rapid.db.seat;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.meli.backend.rapid.db.DataBase;
+import com.meli.backend.rapid.db.Sql;
+import com.meli.backend.rapid.db.sector.SectorSqlRecReader;
 
 public class SeatSql {
 

@@ -1,4 +1,4 @@
-package com.meli.backend.rapid.db;
+package com.meli.backend.rapid.db.reserve;
 
 import java.sql.Timestamp;
 import java.sql.Date;
@@ -7,6 +7,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.meli.backend.rapid.db.DataBase;
+import com.meli.backend.rapid.db.RecordReader;
+import com.meli.backend.rapid.db.concert.ConcertSql;
+import com.meli.backend.rapid.db.concert.ConcertStmt;
+import com.meli.backend.rapid.db.seat.SeatSql;
+import com.meli.backend.rapid.db.seat.SeatStmt;
 import com.meli.backend.rapid.ws.models.ConcertKey;
 import com.meli.backend.rapid.ws.models.ConcertRecord;
 import com.meli.backend.rapid.ws.models.SectorRecord;

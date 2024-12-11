@@ -14,7 +14,7 @@ import com.meli.backend.rapid.common.AppStatus.eRCode;
 import com.meli.backend.rapid.req_ctx.place.PlaceInput;
 import com.meli.backend.rapid.req_ctx.place.PlaceOutput;
 import com.meli.backend.rapid.req_ctx.place.PlaceRequestContext;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.RequestOutput;
+import com.meli.backend.rapid.req_ctx.reserve.RequestOutput;
 import com.meli.backend.rapid.ws.services.PlaceService;
 
 

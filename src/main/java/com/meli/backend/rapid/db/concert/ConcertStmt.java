@@ -1,6 +1,8 @@
-package com.meli.backend.rapid.db;
+package com.meli.backend.rapid.db.concert;
 
 import java.sql.Date;
+
+import com.meli.backend.rapid.db.SqlStmt;
 
 public class ConcertStmt extends SqlStmt  {
 

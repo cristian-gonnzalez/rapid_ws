@@ -1,7 +1,7 @@
 /**
  *  This files contains the input 
  */
-package com.meli.backend.rapid.req_ctx.req_ctx_io;
+package com.meli.backend.rapid.req_ctx.reserve;
 
 import java.util.*;
 import java.sql.Date;

@@ -3,7 +3,7 @@ package com.meli.backend.rapid.req_ctx;
 import java.util.ArrayList;
 
 import com.meli.backend.rapid.common.AppStatus.eRCode;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.RequestOutput;
+import com.meli.backend.rapid.req_ctx.reserve.RequestOutput;
 
 public class RequestContext {
 

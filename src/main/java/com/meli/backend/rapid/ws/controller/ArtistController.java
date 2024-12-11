@@ -15,7 +15,7 @@ import com.meli.backend.rapid.common.AppStatus.eRCode;
 import com.meli.backend.rapid.req_ctx.artist.ArtistInput;
 import com.meli.backend.rapid.req_ctx.artist.ArtistOutput;
 import com.meli.backend.rapid.req_ctx.artist.ArtistRequestContext;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.RequestOutput;
+import com.meli.backend.rapid.req_ctx.reserve.RequestOutput;
 import com.meli.backend.rapid.ws.services.ArtistService;
 
 @RestController

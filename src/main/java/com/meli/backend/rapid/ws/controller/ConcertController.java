@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.*;
 
 import com.meli.backend.rapid.ws.services.ConcertService;
 import com.meli.backend.rapid.common.AppStatus.eRCode;
-import com.meli.backend.rapid.req_ctx.ConcertRequestContext;
-import com.meli.backend.rapid.req_ctx.ConcertRgRequestContext;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertInput;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertOutput;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.ConcertRangeInput;
-import com.meli.backend.rapid.req_ctx.req_ctx_io.RequestOutput;
+import com.meli.backend.rapid.req_ctx.concert.ConcertInput;
+import com.meli.backend.rapid.req_ctx.concert.ConcertOutput;
+import com.meli.backend.rapid.req_ctx.concert.ConcertRangeInput;
+import com.meli.backend.rapid.req_ctx.concert.ConcertRequestContext;
+import com.meli.backend.rapid.req_ctx.concert.ConcertRgRequestContext;
+import com.meli.backend.rapid.req_ctx.reserve.RequestOutput;
 
 @RestController
 @RequestMapping("/concert")

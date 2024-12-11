@@ -2,7 +2,7 @@
  *  Generic response. It is used in all request since we want to give the same response format.
  */
 
-package com.meli.backend.rapid.req_ctx.req_ctx_io;
+package com.meli.backend.rapid.req_ctx.reserve;
 
 import com.meli.backend.rapid.common.AppStatus;
 
