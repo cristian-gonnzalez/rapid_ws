@@ -3,9 +3,11 @@ import requests
 import json
 import threading
 import os
-from common import test_runner, assert_reponse
+from common import *
 from itertools import combinations
 from concertTests import assertResponseFields
+import setup
+from setup import CONCERTS
 
 api_url = "http://127.0.0.1:8080"
 headers = {"Content-Type":"application/json"}
@@ -13,10 +15,7 @@ headers = {"Content-Type":"application/json"}
 def simpleGetRequestResponse200Test():
 
     url = api_url + "/concert/range"
-    data = {
-    }
-    response = requests.get(url, data=json.dumps(data), headers=headers)
-    assert response.status_code == 200, response.status_code
+    response = send_get(url)
     response = assert_reponse( response )
     
     assert isinstance(response['data'], list)
@@ -38,8 +37,8 @@ def rSubset(arr):
 
 def combinateInputFieldsResponse200Test():
     input_cmd = { 
-      'artist':'ARTIST_1',
-      'place': 'PLACE_1', 
+      'artist': CONCERTS[0]['artist'],
+      'place': CONCERTS[0]['place'], 
        'fromDate': '2020-01-01', 'untilDate':'2026-01-01', 
        'fromPrice': 10, 'untilPrice': 10000, 
        'dateASC': False, 
@@ -56,8 +55,7 @@ def combinateInputFieldsResponse200Test():
         for key in fields:
             data.pop(key, None)
         print( data )
-        response = requests.get(url, data=json.dumps(data), headers=headers)
-        assert response.status_code == 200, response.status_code
+        response = send_get(url, data)
         response = assert_reponse( response )
     
         assert isinstance(response['data'], list)
@@ -67,6 +65,8 @@ def combinateInputFieldsResponse200Test():
 
 
 if __name__ == '__main__': 
+
+    setup.init()
 
     tests = [
         test_runner(combinateInputFieldsResponse200Test),

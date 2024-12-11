@@ -8,7 +8,12 @@ public class ArtistRequestContext extends RequestContext {
     
     public ArtistRequestContext( ArtistInput input ) {
         super();
-        this.input = input;
+        if( input == null ) {
+            this.input = new ArtistInput();
+        }
+        else {
+            this.input = input;
+        }
     }
 
 }

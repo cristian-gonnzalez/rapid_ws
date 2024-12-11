@@ -15,21 +15,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class ReserveInput {
 
-    /** The artist name. */
-    @JsonProperty(required = true)
+    private Integer reserveId;
+
     private String artist;
 
-    /** The place name. */
-    @JsonProperty(required = true)
     private String place;
     
-    /** The concert date. */
     @JsonFormat(timezone = "GMT-03:00")
-    @JsonProperty(required = true)
     private Date concertDate;
 
-    /** The sector name. */
-    @JsonProperty(required = true)
     private String sector;
 
     /** List of seats to reserve. 
@@ -50,11 +44,19 @@ public class ReserveInput {
 
     /** User id. */
     @JsonProperty(required = true)
-    private long dni;
+    private Long dni;
 
     public ReserveInput() {
     }
     
+    public void setReserveId( Integer  reserveId ) {
+        this.reserveId = reserveId;
+    }
+
+    public Integer  getReserveId() {
+        return this.reserveId;
+    }
+
     public void setDNI( Long dni ) {
         this.dni = dni;
     }

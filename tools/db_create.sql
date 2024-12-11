@@ -13,14 +13,16 @@ USE `dbtest`;
 CREATE TABLE IF NOT EXISTS `Artist` (
   `artistId` int NOT NULL AUTO_INCREMENT,
   `name`  varchar(50)  NOT NULL,
-  PRIMARY KEY (`artistId`)
+  PRIMARY KEY (`artistId`),
+  UNIQUE (`name`)
 ) ;
 
 -- Create the table Place (This represent the stadium or place where the artist can play)
 CREATE TABLE IF NOT EXISTS `Place` (
   `placeId` int NOT NULL AUTO_INCREMENT,
   `name`  varchar(50)  NOT NULL,
-  PRIMARY KEY (`placeId`)
+  PRIMARY KEY (`placeId`),
+  UNIQUE (`name`)
 ) ;
 
 -- Create the table Concert (This represent the show or event where the artist play). 
@@ -51,7 +53,8 @@ CREATE TABLE IF NOT EXISTS `ConcertSector` (
   `occupiedSpace` int NOT NULL,
   `hasSeat` int NOT NULL,
   `price` double NOT NULL,
-  PRIMARY KEY (`artistId`, `placeId`, `concertDate`, `sectorId`)
+  PRIMARY KEY (`artistId`, `placeId`, `concertDate`, `sectorId`),
+  UNIQUE (`artistId`, `placeId`, `concertDate`, `name`)
 ) ;
 
 -- Add a fk to the Concert since it is related to the concert (show)
@@ -77,7 +80,8 @@ CREATE TABLE IF NOT EXISTS `Reserve` (
 
 -- Points the fk to the concert sector 
 ALTER TABLE `Reserve`
-  ADD CONSTRAINT `fk_Reserve_1` FOREIGN KEY (`artistId`, `placeId`, `concertDate`, `sectorId`) REFERENCES `ConcertSector` (`artistId`, `placeId`, `concertDate`, `sectorId`);
+  ADD CONSTRAINT `fk_Reserve_1` FOREIGN KEY (`artistId`, `placeId`, `concertDate`, `sectorId`) REFERENCES `ConcertSector` (`artistId`, `placeId`, `concertDate`, `sectorId`),
+  ADD CONSTRAINT `fk_Reserve_2` FOREIGN KEY (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`) REFERENCES `Seat` (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`);
 
 -- Create the table Seat.
 -- The table saves the reserved seats that belongs to one concert sector in a concert date
@@ -91,8 +95,7 @@ CREATE TABLE IF NOT EXISTS `Seat` (
   PRIMARY KEY (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`, `seatNumber`)
 ) ;
 
--- Point the fk to the concert sector
-ALTER TABLE `Seat`
-  ADD CONSTRAINT `fk_Seat_1` FOREIGN KEY (`artistId`, `placeId`, `concertDate`, `sectorId`) REFERENCES `ConcertSector` (`artistId`, `placeId`, `concertDate`, `sectorId`),
-  ADD CONSTRAINT `fk_Seat_2` FOREIGN KEY (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`) REFERENCES `Reserve` (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`);
 
+ALTER TABLE `Seat`
+  ADD CONSTRAINT `fk_Seat_1` FOREIGN KEY (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`) REFERENCES `Reserve` (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`),
+  ADD CONSTRAINT `fk_Reserve_2` FOREIGN KEY (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`) REFERENCES `Seat` (`reserveId`, `artistId`, `placeId`, `concertDate`, `sectorId`);

@@ -7,12 +7,14 @@ import com.meli.backend.rapid.db.DataBase;
 import com.meli.backend.rapid.db.reserve.ReserveSql;
 import com.meli.backend.rapid.db.reserve.ReserveStmt;
 import com.meli.backend.rapid.req_ctx.concert.SectorOutput;
-import com.meli.backend.rapid.req_ctx.reserve.ReserveDelRequestContext;
 import com.meli.backend.rapid.req_ctx.reserve.ReserveGetRequestContext;
 import com.meli.backend.rapid.req_ctx.reserve.ReserveOutput;
 import com.meli.backend.rapid.req_ctx.reserve.ReserveRequestContext;
 import com.meli.backend.rapid.ws.models.SectorRecord;
+import com.meli.backend.rapid.ws.models.ConcertKey;
+import com.meli.backend.rapid.ws.models.ReserveKey;
 import com.meli.backend.rapid.ws.models.ReserveRecord;
+import com.meli.backend.rapid.ws.models.SectorKey;
 
 public class ReserveRepository {
 
@@ -87,7 +89,6 @@ public class ReserveRepository {
 
     private boolean insertReservedSeats(DataBase db, ReserveOutput reserve, SectorRecord sector_rec ) throws SQLException {
             
-        
         List<Integer> seats = sector_rec.getSeats();
         String values ="";
             for(int i=0; i<seats.size(); i++) {
@@ -107,12 +108,15 @@ public class ReserveRepository {
     }
 
     private boolean updateConcertSector(DataBase db, SectorRecord cs) throws SQLException {
+        SectorKey sectorKey = cs.getSetorKey();
+        ConcertKey concertKey = sectorKey.getConcerKey();
         String sql = "update ConcertSector " + 
                          "set occupiedSpace = " + cs.getOccupiedSpace() + " " +
-                         " where artistId = " + cs.getSetorKey().getConcerKey().getArtistId() + " and " + 
-                               " placeId = " + cs.getSetorKey().getConcerKey().getPlaceId()  + " and " + 
-                               " concertDate = '" + cs.getSetorKey().getConcerKey().getConcertDate()  + "' and " + 
-                               " sectorId = " + cs.getSetorKey().getSectorId()  + ";";
+                         " where artistId = " + concertKey.getArtistId() + " and " + 
+                               " placeId = " + concertKey.getPlaceId()  + " and " + 
+                               " concertDate = '" + concertKey.getConcertDate()  + "' and " + 
+                               " sectorId = " + sectorKey.getSectorId()  + ";";
+        System.out.println(sql);
         return execsql(db, sql);
      }
 
@@ -228,11 +232,12 @@ public class ReserveRepository {
     } 
 
 
-    public ReserveRecord getReserve(ReserveDelRequestContext ctx) throws SQLException{
+    public ReserveRecord getReserve(ReserveRequestContext ctx) throws SQLException{
 
         // creates an statement
         ReserveStmt stmt = new ReserveStmt();
-        stmt.setReserveId(ctx.input.getReserveId());
+        if( ctx.input.getReserveId() != null)
+            stmt.setReserveId(ctx.input.getReserveId());
         stmt.setArtist(ctx.input.getArtist());
         stmt.setPlace(ctx.input.getPlace());
         stmt.setDate(ctx.input.getConcertDate());
@@ -251,13 +256,17 @@ public class ReserveRepository {
     } 
 
     
-    public boolean deleteReserve(ReserveRecord rec) throws SQLException {
+    public boolean deleteReserve(ReserveRecord rec, SectorRecord sector) throws SQLException {
         
-        String wsql = " where reserveId = " + rec.getReserveKey().getReserveId() + " and " + 
-        " artistId = " + rec.getReserveKey().getSectorKey().getConcerKey().getArtistId() + " and " + 
-        " placeId = " + rec.getReserveKey().getSectorKey().getConcerKey().getPlaceId()  + " and " + 
-        " concertDate = '" + rec.getReserveKey().getSectorKey().getConcerKey().getConcertDate()  + "' and " + 
-        " sectorId = " + rec.getReserveKey().getSectorKey().getSectorId()  + ";";
+        ReserveKey reserveKey = rec.getReserveKey();
+        SectorKey sectorKey = reserveKey.getSectorKey();
+        ConcertKey concertKey = sectorKey.getConcerKey();
+
+        String wsql = " where reserveId = " + reserveKey.getReserveId() + " and " + 
+        " artistId = " + concertKey.getArtistId() + " and " + 
+        " placeId = " + concertKey.getPlaceId()  + " and " + 
+        " concertDate = '" + concertKey.getConcertDate()  + "' and " + 
+        " sectorId = " + sectorKey.getSectorId()  + ";";
 
         boolean r = false;
         DataBase db = new DataBase();
@@ -267,9 +276,10 @@ public class ReserveRepository {
             db.begin();
 
             String sql;    
-            if( rec.getConcert().getSectors().get(0).getHasSeat()) {
+            if( sector.getHasSeat()) {
                 
                 sql = "delete from Seat " + wsql;
+                System.out.println( sql );
                 r = execsql(db, sql);
                 if(!r) {
                     System.err.println("Failed to delete seats");    
@@ -279,7 +289,16 @@ public class ReserveRepository {
                 }
             }
 
+            r =updateConcertSector( db, sector );
+            if( !r ) {
+                System.err.println("Failed to update sector");    
+                db.rollback();
+                db.disconnect();
+                return r;
+            }
+
             sql = "delete from Reserve " + wsql;
+            System.err.println(sql);
             r = execsql(db, sql);
             if( !r ) {
                 System.err.println("Failed to delete reserve");    
@@ -288,15 +307,6 @@ public class ReserveRepository {
                 return r;
             }
         
-            
-            r =updateConcertSector( db, rec.getConcert().getSectors().get(0) );
-            if( !r ) {
-                System.err.println("Failed to update sector");    
-                db.rollback();
-                db.disconnect();
-                return r;
-            }
-            
             db.commit();
         } catch (SQLException e) {
             db.rollback();

@@ -29,10 +29,9 @@ public class DataBase {
             String user = appproperties.getProperty("spring.datasource.username");
             String pswd = appproperties.getProperty("spring.datasource.password");
             
-            System.out.println("Connect to "+ url);
-            System.out.println("[user: "+ user + " pswd: " + pswd +"]");
-
+            System.out.print("Connecting to "+ url + " [user: "+ user + " pswd: " + pswd +"]. ");
             conn = DriverManager.getConnection(url, user, pswd);            
+            System.out.println("Connected. ");
         }
         catch (Exception e) {
             System.out.println(e.getMessage());

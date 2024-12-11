@@ -3,21 +3,17 @@ import requests
 import json
 import threading
 import os
-from common import test_runner, assert_reponse
-
+from common import *
+import setup
+from setup import CONCERTS
 
 api_url = "http://127.0.0.1:8080"
+url = api_url + "/concert"
 headers = {"Content-Type":"application/json"}
+concerts = CONCERTS
 
 def simpleGetRequestResponse200Test():
-
-    url = api_url + "/concert"
-    data = {
-    }
-    response = requests.get(url, data=json.dumps(data), headers=headers)
-    assert response.status_code == 200, response.json()
-    response = assert_reponse( response )
-    
+    response = send_get( url , check_http_status_ok= True )
     assert isinstance(response['data'], list)
     assert response['appStatus']['code'] == 'success', response['appStatus']['code']
 
@@ -26,23 +22,24 @@ def artistGetRequestResonseOneRecordTest():
 
     url = api_url + "/concert"
     data = {
-        'artist': 'ARTIST_2'
+        'artist': concerts[1]['artist'],
+        'place': concerts[1]['place'],
+        'concertDate': concerts[1]['concertDate']
     }
-    response = requests.get(url, data=json.dumps(data), headers=headers)
-    response = assert_reponse( response )
+    print( 'Sendig \n' + str( data ) )
+    response = send_get( url , data, check_http_status_ok= True )
+    print( 'Response \n' + str( response ) )
     
     assert isinstance(response['data'], list)
     assert response['appStatus']['code'] == 'success', response['appStatus']['code']
-    
-    assert len( response['data'] ) == 5, len( response['data'] ) 
-    
+       
     r = response['data'][0]
-    assert r['artist'] == 'ARTIST_2', r['artist']
-    assert r['place'] == 'PLACE_1', r['place']
-    assert len(r['sectors']) == 1, len(r['sectors'])
+    print( r )
+    assert r['artist'] == concerts[1]['artist'], r['artist']
+    assert r['place'] == concerts[1]['place'], r['place']
+    assert r['concertDate'] == concerts[1]['concertDate'], r['place']
     
     
-
 def unknownArtistGetRequestResponseEmptyTest():
 
     # we know that the dbtest has only one record with this artitst
@@ -50,11 +47,10 @@ def unknownArtistGetRequestResponseEmptyTest():
     data = {
         'artist': 'UNKNOWN_ARTITST'
     }
-    response = requests.get(url, data=json.dumps(data), headers=headers)
-    response = assert_reponse( response )
-  
+    response = send_get( url , data, check_http_status_ok= True )
     assert len( response['data'] ) == 0, response['data']
     
+
 def multiplesGetRequestTest():
 
     workers = []
@@ -66,24 +62,23 @@ def multiplesGetRequestTest():
     for w in workers: 
         w.join()
 
+
 def paramGetRequestResponseOneTwoThreeRecTest():
 
     url = api_url + "/concert?rec_num=0&offset=1"
-    data = {
-    }
-    response = requests.get(url, data=json.dumps(data), headers=headers)
+    response = send_get(url)
     response = assert_reponse( response )
   
     assert len( response['data'] ) == 1, response['data']
     
     url = api_url + "/concert?rec_num=0&offset=3"
-    response = requests.get(url, data=json.dumps(data), headers=headers)
+    response = send_get(url)
     response = assert_reponse( response )
   
     assert len( response['data'] ) == 3, len( response['data'] )
 
     url = api_url + "/concert?rec_num=1&offset=2"
-    response = requests.get(url, data=json.dumps(data), headers=headers)
+    response = send_get(url)
     response = assert_reponse( response )
   
     assert len( response['data'] ) == 2, len( response['data'] )
@@ -103,31 +98,24 @@ def combineInputFieldsGetReturnsSuccess():
 
     for input_field in input_fields:
         url = api_url + "/concert"
-        response = requests.get(url, data=json.dumps(input_field), headers=headers)
-        response = assert_reponse( response )
-      
+        send_get(url, input_field)      
 
 
 def paramGetRequestResponseOneRecTest():
 
     url = api_url + "/concert?rec_num=0&offset=1"
-    data = {
-    }
-    response = requests.get(url, data=json.dumps(data), headers=headers)
-    response = assert_reponse( response )
-  
+    response = send_get( url )
+    
     assert len( response['data'] ) == 1, response['data']
     
     url = api_url + "/concert?rec_num=0&offset=3"
-    response = requests.get(url, data=json.dumps(data), headers=headers)
-    response = assert_reponse( response )
-  
+    response = send_get( url )
+    
     assert len( response['data'] ) == 3, len( response['data'] )
 
     url = api_url + "/concert?rec_num=1&offset=2"
-    response = requests.get(url, data=json.dumps(data), headers=headers)
-    response = assert_reponse( response )
-  
+    response = send_get( url )
+    
     assert len( response['data'] ) == 2, len( response['data'] )
 
 
@@ -150,15 +138,38 @@ def assertResponseFields( response ):
 
 def checksResponseFields():
     url = api_url + "/concert"
-    input_fields = {
-    }
-    response = requests.get(url, data=json.dumps(input_fields), headers=headers)
+    response = send_get(url)
     response = assert_reponse( response )
     assertResponseFields( response )
 
+
+def setupTest():
+
+
+    setup.deleteAll()
+    setup.createArtist()
+    setup.createPlace()
+
+
+def createConcertRespons200():
+    
+    for c in concerts:
+        payload = {
+            'artist': c['artist'],
+            'place': c['place'],
+            'concertDate': c['concertDate'],
+            'time': c['time']
+        }
+        print(payload)
+        send_post(url, payload, check_http_status_ok=True)
+
+
 if __name__ == '__main__': 
 
+    setupTest()    
+    
     tests = [
+        test_runner(createConcertRespons200),
         test_runner(simpleGetRequestResponse200Test),
         test_runner(artistGetRequestResonseOneRecordTest),
         test_runner(unknownArtistGetRequestResponseEmptyTest),

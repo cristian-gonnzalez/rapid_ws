@@ -2,12 +2,13 @@ import sys
 import requests
 import json
 import os
-from common import test_runner, assert_reponse
-
+from common import *
+import setup
+from setup import CONCERTS
 
 api_url = "http://127.0.0.1:8080"
-headers = {"Content-Type":"application/json"}
-
+url = api_url + "/concert/reserve"
+    
 
 reserve_id = None
 
@@ -30,22 +31,20 @@ def assertFieldsResponse( response ):
 
 
 def reserveResponse200Test():
-
-    url = api_url + "/concert/reserve"
     data = {
-        "artist": "ARTIST_1",
-        "place": "PLACE_1",
-        "concertDate": "2025-01-01",
-        "sector": "A1P1S2", 
+        "artist": CONCERTS[3]['artist'],
+        "place": CONCERTS[3]['place'],
+        "concertDate": CONCERTS[3]['concertDate'],
+        "sector": CONCERTS[3]['sectors'][0]['name'], 
         "seats": [3,4], 
         "surname": "Gonzalez",
         "name": "Cristian",
         "dni": "12123123"
     }
-    response = requests.post(url, data=json.dumps(data), headers=headers)
-    print(response.json())
-    assert response.status_code == 200, response.status_code
-    response = assert_reponse( response )
+
+    print( data )
+    response = send_post( url, data )
+    print(response)
     
     assert isinstance(response['data'], dict)
     assert response['appStatus']['code'] == 'success', response['appStatus']['code']
@@ -57,49 +56,37 @@ def reserveResponse200Test():
 def deleteReserveResponse200Test():
     global reserve_id
     
-    url = api_url + "/concert/reserve"
     data = {
-        'reserveId': 1,
-        "artist": "ARTIST_1",
-        "place": "PLACE_1",
-        "concertDate": "2025-01-01",
-        "sector": "A1P1S2", 
-        "seats": [3,4]
+        'reserveId': reserve_id,
+        "artist": CONCERTS[3]['artist'],
+        "place": CONCERTS[3]['place'],
+        "concertDate": CONCERTS[3]['concertDate'],
+        "sector": CONCERTS[3]['sectors'][0]['name']
     }
 
-    response = requests.delete(url, data=json.dumps(data), headers=headers)
-    assert response.status_code == 200, response.status_code
+    response = send_delete(url, data)
     response = assert_reponse( response )
-    print(response)
-    
-    #assert isinstance(response['data'], dict)
-    assert response['appStatus']['code'] == 'success', response['appStatus']['code']
     
 
 def reserveDuplicatedResponseFailedTest():
 
-    url = api_url + "/concert/reserve"
     data = {
-        "artist": "ARTIST_1",
-        "place": "PLACE_1",
-        "concertDate": "2025-01-01",
-        "sector": "A1P1S2", 
+        "artist": CONCERTS[3]['artist'],
+        "place": CONCERTS[3]['place'],
+        "concertDate": CONCERTS[3]['concertDate'],
+        "sector": CONCERTS[3]['sectors'][0]['name'], 
         "seats": [3,4], 
         "surname": "Gonzalez",
         "name": "Cristian",
         "dni": "12123123"
     }
-    response = requests.post(url, data=json.dumps(data), headers=headers)
-    print( response.json() )
-    response = response.json()
-    #assert response.status_code == 400, response.status_code
-    #response = assert_reponse( response )
-    
-    #assert not isinstance(response['data'], dict)
-    assert response['appStatus']['code'] == 'noRoomAvailable', response['appStatus']['code']
+    response = send_post(url, data, check_http_status_ok=False)
+    assert_error( response, 'alreadyRserved' )
 
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
+
+    setup.init()
 
     tests = [
         test_runner(reserveResponse200Test),

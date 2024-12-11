@@ -1,7 +1,6 @@
 package com.meli.backend.rapid.ws.repositories;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.meli.backend.rapid.common.AppStatus.eRCode;
@@ -10,7 +9,6 @@ import com.meli.backend.rapid.db.artist.ArtistDelStmt;
 import com.meli.backend.rapid.db.artist.ArtistInsertStmt;
 import com.meli.backend.rapid.db.artist.ArtistSelSql;
 import com.meli.backend.rapid.db.artist.ArtistSelStmt;
-import com.meli.backend.rapid.req_ctx.artist.ArtistOutput;
 import com.meli.backend.rapid.req_ctx.artist.ArtistRequestContext;
 import com.meli.backend.rapid.ws.models.ArtistRecord;
 
@@ -59,7 +57,7 @@ public class ArtistRepository {
         }
     }
 
-    public List<ArtistOutput> getArtists(ArtistRequestContext ctx) throws SQLException {
+    public List<ArtistRecord> getArtists(ArtistRequestContext ctx) throws SQLException {
         ArtistSelStmt stmt = new ArtistSelStmt();
 
         if( ctx.input.getName() != null ) {
@@ -74,20 +72,6 @@ public class ArtistRepository {
         
         db.disconnect();
 
-        return recordsToOutputs( records );
-    }
-        
-    private List<ArtistOutput> recordsToOutputs(List<ArtistRecord> records) {
-        List<ArtistOutput> outputs =  new ArrayList<>();
-        for( int i=0;i< records.size(); i++) {
-            outputs.add( recordToOutput(records.get(i) ));
-        }
-        return outputs;
-    }
-
-    private ArtistOutput recordToOutput(ArtistRecord artistRecord) {
-        ArtistOutput output = new ArtistOutput();
-        output.setName(artistRecord.getName());
-        return output;
+        return records;
     }
 }

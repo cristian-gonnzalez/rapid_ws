@@ -19,7 +19,7 @@ public class SeatSql {
     
     public List<Integer> read() throws SQLException {
         List<Object> objects = new ArrayList<>();
-        this.sqlqry.read( new SectorSqlRecReader(), objects, null );
+        this.sqlqry.read( new SeatSqlRecReader(), objects, null );
 
         List<Integer> records = objects.stream()
                                         .filter(element->element instanceof Integer)

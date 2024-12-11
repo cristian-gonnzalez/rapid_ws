@@ -14,8 +14,11 @@ public class ReserveRequestContext extends RequestContext {
     public ReserveRequestContext( ReserveInput input ) {
         super();
         this.input = input;
-        this.output = new RequestOutput();
-        this.output.setData(new ReserveOutput());
+        if(this.input == null) {
+            this.input = new ReserveInput();
+        }
+
+        this.output.setData(new ReserveOutput());       
     }
 }
 

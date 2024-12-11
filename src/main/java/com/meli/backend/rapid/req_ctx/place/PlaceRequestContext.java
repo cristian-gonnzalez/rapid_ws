@@ -7,7 +7,12 @@ public class PlaceRequestContext extends RequestContext {
     
     public PlaceRequestContext( PlaceInput input ) {
         super();
-        this.input = input;
+        if( input == null ) {
+            this.input = new PlaceInput();
+        }
+        else {
+            this.input = input;
+        }
     }
 
 }

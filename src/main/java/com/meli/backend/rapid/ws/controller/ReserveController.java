@@ -49,10 +49,20 @@ public class ReserveController {
     public ResponseEntity<RequestOutput> createReserve(@RequestBody (required = true) ReserveInput input) { 
         ReserveRequestContext ctx = new ReserveRequestContext(input );
         
-        if( validateInput( ctx, ctx.input) ) {
-            this.reserveService.createReserve(ctx);            
+        try {
+
+            if( validateInput( ctx, ctx.input) ) {
+                this.reserveService.createReserve(ctx);            
+            }
+                
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            if( !ctx.isOnError() ) {
+                ctx.setError(eRCode.internalError, "Unknow error");
+                ctx.output.setData(new ArrayList<>());
+            }   
         }
-            
+
         if(ctx.isOnError())
             ctx.output.setData(new ArrayList<>());
 
@@ -85,9 +95,9 @@ public class ReserveController {
 
 
     @DeleteMapping("/reserve")
-    public ResponseEntity<RequestOutput> deleteReserve(@RequestBody (required = true) ReserveDelInput input) {
+    public ResponseEntity<RequestOutput> deleteReserve(@RequestBody (required = true) ReserveInput input) {
         
-        ReserveDelRequestContext ctx = new ReserveDelRequestContext(input );
+        ReserveRequestContext ctx = new ReserveRequestContext(input );
         
         if( ctx.input.getReserveId() == null || ctx.input.getArtist() == null || 
             ctx.input.getPlace() == null || ctx.input.getConcertDate() == null || ctx.input.getSector() == null ) {

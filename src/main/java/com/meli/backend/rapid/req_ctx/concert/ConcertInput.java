@@ -2,6 +2,7 @@ package com.meli.backend.rapid.req_ctx.concert;
 
 
 import java.sql.Date;
+import java.sql.Time;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -12,10 +13,23 @@ public class ConcertInput {
     
     String place;
 
-    @JsonFormat(timezone = "GMT-03:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "GMT-03:00")
     Date concertDate;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    Time time;
+
+    SectorInput sector;
+
     public ConcertInput() {
+    }
+
+    public void setSector( SectorInput sector ) {
+        this.sector = sector;
+    }
+
+    public SectorInput getSector() {
+        return this.sector;
     }
 
     public void setConcertDate( Date concertDate ) {
@@ -40,5 +54,13 @@ public class ConcertInput {
 
     public String getPlace() {
         return this.place;
+    }
+
+    public void setTime( Time time ) {
+        this.time = time;
+    }
+
+    public Time getTime() {
+        return this.time;
     }
 }

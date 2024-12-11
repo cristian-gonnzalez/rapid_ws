@@ -3,25 +3,21 @@ import requests
 import json
 import threading
 import os
-from common import test_runner, assert_reponse
+from common import *
+import setup
+from setup import artist_url
 
-
-api_url = "http://127.0.0.1:8080"
-url = api_url + "/artist"
-headers = {"Content-Type":"application/json"}
 
 def createArtistReturns200Test():
 
-    url = api_url + "/artist"
     data = {
         'name': 'Artist1'
     }
-    response = requests.post(url, data=json.dumps(data), headers=headers)
+    response = send_post( artist_url, data )
     response = assert_reponse( response )
     
-    response = requests.get(url, data=json.dumps(data), headers=headers)
+    response = send_get( artist_url, data )
     response = assert_reponse( response )
-    print(response)
     
     assert response['data'][0]['name'] == 'Artist1', response
     
@@ -29,29 +25,28 @@ def createArtistReturns200Test():
 def deleteArtistReturns200Test():
 
     # deletes all artists
-    response = requests.get(url, data=json.dumps({}), headers=headers)
+    response = send_get( artist_url)
     response = assert_reponse( response )
      
     for d in response['data']:
         data = {
                 'name': d['name']
         }
-        requests.delete(url, data=json.dumps(data), headers=headers)
+        send_delete(artist_url, data)
         
 
     # creates artits    
     for i in range(5):
         name = 'Artist%d' % i
-        print("adding " + name )
         data = {
             'name': name
         }
-        response = requests.post(url, data=json.dumps(data), headers=headers)
+        response = send_post( artist_url, data )
         response = assert_reponse( response )
-        
+    
     
     # gets artits
-    response = requests.get(url, data=json.dumps({}), headers=headers)
+    response = send_get( artist_url)
     response = assert_reponse( response )
      
     for i, d in enumerate(response['data']):
@@ -63,12 +58,12 @@ def deleteArtistReturns200Test():
     data = {
             'name': 'Artist3'
     }
-    response = requests.delete(url, data=json.dumps(data), headers=headers)
+    response = send_delete(artist_url, data)
     response = assert_reponse( response )
     
     
     # gets artits
-    response = requests.get(url, data=json.dumps({}), headers=headers)
+    response = send_get( artist_url)
     response = assert_reponse( response )
     
     # checks that artist 3 does not exits
@@ -82,6 +77,8 @@ def deleteArtistReturns200Test():
         i+=1
         
 if __name__ == '__main__': 
+    
+    setup.deleteAll()
 
     tests = [
         test_runner(createArtistReturns200Test),
